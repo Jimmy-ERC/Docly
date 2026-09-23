@@ -1,0 +1,8 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Docly.Application/Docly.Application.csproj" />
+    <Project Path="src/Docly.Domain/Docly.Domain.csproj" />
+    <Project Path="src/Docly.Infrastructure/Docly.Infrastructure.csproj" />
+    <Project Path="src/Docly.Web/Docly.Web.csproj" />
+  </Folder>
+</Solution>

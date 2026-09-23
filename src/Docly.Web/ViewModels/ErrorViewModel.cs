@@ -1,4 +1,4 @@
-namespace Docly.Web.Models;
+namespace Docly.Web.ViewModels;
 
 public class ErrorViewModel
 {

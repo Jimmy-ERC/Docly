@@ -1,4 +1,5 @@
 ﻿using Docly.Domain.Authorization;
+using Docly.Domain.Settings;
 using Docly.Infrastructure.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
@@ -15,6 +16,7 @@ public class DoclyDbContext : IdentityDbContext<ApplicationUser, ApplicationRole
 
     public DbSet<Permission> Permissions => Set<Permission>();
     public DbSet<RolePermission> RolePermissions => Set<RolePermission>();
+    public DbSet<SystemSetting> SystemSettings => Set<SystemSetting>();
 
     // Other domain entities (Document, Category, KnowledgeChunk...) will be added here as DbSet<T>.
 

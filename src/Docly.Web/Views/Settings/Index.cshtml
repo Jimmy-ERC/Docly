@@ -1,0 +1,55 @@
+@using Docly.Domain.Settings
+@model Docly.Web.ViewModels.Settings.SystemSettingsViewModel
+@{
+    ViewData["Title"] = "Configuración del sistema";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="h3 mb-0">Configuración del sistema</h1>
+</div>
+
+<p class="text-muted">
+    Parámetros del pipeline RAG y de la aplicación. El modelo de embeddings y su dimensionalidad no son
+    configurables aquí: cambiarlos haría que los vectores ya generados dejen de ser comparables con los nuevos.
+</p>
+
+<div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+<form asp-action="Index" method="post">
+    <div class="row g-3">
+        @for (var i = 0; i < Model.Settings.Count; i++)
+        {
+            var setting = Model.Settings[i];
+            <div class="col-md-6">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <label class="form-label fw-bold" for="value-@i">@setting.Name</label>
+                        <input type="hidden" asp-for="Settings[i].Key" />
+                        <input type="hidden" asp-for="Settings[i].Name" />
+                        <input type="hidden" asp-for="Settings[i].Description" />
+                        <input type="hidden" asp-for="Settings[i].Type" />
+
+                        @if (setting.Type == SystemSettingType.Text)
+                        {
+                            <input asp-for="Settings[i].Value" id="value-@i" class="form-control" />
+                        }
+                        else
+                        {
+                            <input asp-for="Settings[i].Value" id="value-@i" type="number"
+                                   step="@(setting.Type == SystemSettingType.Decimal ? "0.01" : "1")"
+                                   min="@(setting.Type == SystemSettingType.Decimal ? "0" : "1")"
+                                   class="form-control" />
+                        }
+
+                        @if (!string.IsNullOrWhiteSpace(setting.Description))
+                        {
+                            <div class="form-text">@setting.Description</div>
+                        }
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+    <button type="submit" class="btn btn-primary mt-3">Guardar</button>
+</form>

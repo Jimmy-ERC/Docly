@@ -1,0 +1,16 @@
+@model Docly.Web.ViewModels.Roles.RoleFormViewModel
+@{
+    ViewData["Title"] = "Nuevo rol";
+}
+
+<h1 class="h3 mb-3">Nuevo rol</h1>
+
+<form asp-action="Create" method="post">
+    <partial name="_Form" model="Model" />
+    <button type="submit" class="btn btn-primary">Crear rol</button>
+    <a asp-action="Index" class="btn btn-link">Cancelar</a>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

@@ -1,0 +1,46 @@
+@model Docly.Web.ViewModels.Roles.RoleFormViewModel
+
+<div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+<div class="mb-3">
+    <label asp-for="Name" class="form-label"></label>
+    @if (Model.Id is null)
+    {
+        <input asp-for="Name" class="form-control" autofocus />
+        <span asp-validation-for="Name" class="text-danger"></span>
+    }
+    else
+    {
+        <input asp-for="Name" class="form-control" readonly />
+        <div class="form-text">El nombre de un rol no se puede cambiar.</div>
+    }
+</div>
+
+<div class="mb-3">
+    <label asp-for="Description" class="form-label"></label>
+    <input asp-for="Description" class="form-control" />
+    <span asp-validation-for="Description" class="text-danger"></span>
+</div>
+
+<h2 class="h5">Permisos</h2>
+@if (Model.IsAdmin)
+{
+    <p class="text-muted">El rol Admin siempre tiene todos los permisos.</p>
+}
+
+<div class="mb-3">
+    @foreach (var permission in Model.Permissions)
+    {
+        <div class="form-check mb-2">
+            <input class="form-check-input" type="checkbox" name="SelectedPermissions" value="@permission.Code"
+                   id="perm-@permission.Code" checked="@permission.Selected" disabled="@Model.IsAdmin" />
+            <label class="form-check-label" for="perm-@permission.Code">
+                <strong>@permission.Name</strong> <code class="ms-1">@permission.Code</code>
+                @if (!string.IsNullOrWhiteSpace(permission.Description))
+                {
+                    <div class="text-muted small">@permission.Description</div>
+                }
+            </label>
+        </div>
+    }
+</div>

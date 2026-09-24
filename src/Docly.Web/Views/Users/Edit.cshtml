@@ -1,0 +1,87 @@
+@model Docly.Web.ViewModels.Users.UserEditViewModel
+@{
+    ViewData["Title"] = Model.FullName;
+    var canManage = User.HasPermission(PermissionCodes.UsersManage);
+}
+
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a asp-action="Index">Usuarios</a></li>
+        <li class="breadcrumb-item active" aria-current="page">@Model.FullName</li>
+    </ol>
+</nav>
+
+<div class="row g-4">
+    <div class="col-lg-5">
+        <div class="card">
+            <div class="card-body">
+                <h1 class="h4">@Model.FullName</h1>
+                <p class="text-muted mb-2">@Model.Email</p>
+                <p class="mb-2">
+                    Estado:
+                    @if (Model.IsActive)
+                    {
+                        <span class="badge text-bg-success">Activo</span>
+                    }
+                    else
+                    {
+                        <span class="badge text-bg-danger">Desactivado</span>
+                    }
+                </p>
+                <p class="mb-3">Registrado el @Model.CreatedAt.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</p>
+
+                @if (canManage && !Model.IsSelf)
+                {
+                    <form asp-action="SetActive" method="post">
+                        <input type="hidden" name="id" value="@Model.Id" />
+                        <input type="hidden" name="isActive" value="@((!Model.IsActive).ToString().ToLowerInvariant())" />
+                        @if (Model.IsActive)
+                        {
+                            <button type="submit" class="btn btn-outline-danger">Desactivar cuenta</button>
+                        }
+                        else
+                        {
+                            <button type="submit" class="btn btn-outline-success">Activar cuenta</button>
+                        }
+                    </form>
+                }
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-7">
+        <div class="card">
+            <div class="card-body">
+                <h2 class="h5">Roles</h2>
+
+                @if (Model.IsSelf)
+                {
+                    <p class="text-muted">No puedes cambiar tus propios roles ni desactivar tu cuenta.</p>
+                }
+
+                <form asp-action="SetRoles" method="post">
+                    <input type="hidden" name="id" value="@Model.Id" />
+                    @foreach (var role in Model.Roles)
+                    {
+                        <div class="form-check mb-2">
+                            <input class="form-check-input" type="checkbox" name="roles" value="@role.Name" id="role-@role.Name"
+                                   checked="@role.Selected" disabled="@(!canManage || Model.IsSelf)" />
+                            <label class="form-check-label" for="role-@role.Name">
+                                <strong>@role.Name</strong>
+                                @if (!string.IsNullOrWhiteSpace(role.Description))
+                                {
+                                    <span class="text-muted"> — @role.Description</span>
+                                }
+                            </label>
+                        </div>
+                    }
+
+                    @if (canManage && !Model.IsSelf)
+                    {
+                        <button type="submit" class="btn btn-primary mt-2">Guardar roles</button>
+                    }
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

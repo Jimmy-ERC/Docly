@@ -1,0 +1,59 @@
+@model Docly.Web.ViewModels.Documents.DocumentEditViewModel
+@{
+    ViewData["Title"] = "Editar documento";
+}
+
+<h1 class="h3 mb-3">Editar documento <span class="text-muted">@Model.Title</span></h1>
+
+<form asp-action="Edit" asp-route-id="@Model.Id" method="post">
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+    <div class="mb-3">
+        <label asp-for="Title" class="form-label"></label>
+        <input asp-for="Title" class="form-control" autofocus />
+        <span asp-validation-for="Title" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Description" class="form-label"></label>
+        <textarea asp-for="Description" class="form-control" rows="3"></textarea>
+        <span asp-validation-for="Description" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="CategoryId" class="form-label"></label>
+        <select asp-for="CategoryId" class="form-select">
+            @foreach (var category in Model.Categories)
+            {
+                <option value="@category.Id" selected="@(category.Id == Model.CategoryId)">@category.Name</option>
+            }
+        </select>
+        <span asp-validation-for="CategoryId" class="text-danger"></span>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Guardar cambios</button>
+    <a asp-action="Index" class="btn btn-link">Cancelar</a>
+</form>
+
+<hr class="my-4" />
+
+<h2 class="h5">Archivo actual</h2>
+<p>
+    <a asp-action="Download" asp-route-id="@Model.Id">@Model.FileName</a>
+    <span class="text-muted">— @((Model.SizeBytes / 1024.0).ToString("N0")) KB, subido el @Model.UploadedAtUtc.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</span>
+</p>
+
+<form asp-action="ReplaceFile" method="post" enctype="multipart/form-data" class="row g-2 align-items-end">
+    <input type="hidden" name="Id" value="@Model.Id" />
+    <div class="col-auto">
+        <label class="form-label">Reemplazar archivo</label>
+        <input type="file" name="File" class="form-control" accept=".pdf,.docx,.txt,.md" required />
+    </div>
+    <div class="col-auto">
+        <button type="submit" class="btn btn-outline-secondary">Reemplazar</button>
+    </div>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

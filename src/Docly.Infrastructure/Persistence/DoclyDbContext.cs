@@ -1,5 +1,6 @@
 ﻿using Docly.Domain.Authorization;
 using Docly.Domain.Categories;
+using Docly.Domain.Documents;
 using Docly.Domain.Settings;
 using Docly.Infrastructure.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
@@ -19,8 +20,10 @@ public class DoclyDbContext : IdentityDbContext<ApplicationUser, ApplicationRole
     public DbSet<RolePermission> RolePermissions => Set<RolePermission>();
     public DbSet<SystemSetting> SystemSettings => Set<SystemSetting>();
     public DbSet<Category> Categories => Set<Category>();
+    public DbSet<Document> Documents => Set<Document>();
+    public DbSet<DocumentFile> DocumentFiles => Set<DocumentFile>();
 
-    // Other domain entities (Document, KnowledgeChunk...) will be added here as DbSet<T>.
+    // Other domain entities (KnowledgeChunk, DocumentProcessingJob...) will be added here as DbSet<T>.
 
     protected override void OnModelCreating(ModelBuilder builder)
     {

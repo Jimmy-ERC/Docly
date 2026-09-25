@@ -1,7 +1,9 @@
 using Docly.Application.Authentication;
+using Docly.Application.Categories;
 using Docly.Application.Roles;
 using Docly.Application.Settings;
 using Docly.Application.Users;
+using Docly.Infrastructure.Categories;
 using Docly.Infrastructure.Identity;
 using Docly.Infrastructure.Persistence;
 using Docly.Infrastructure.Settings;
@@ -66,6 +68,7 @@ public static class DependencyInjection
         services.AddScoped<IUserService, UserService>();
         services.AddScoped<IRoleService, RoleService>();
         services.AddScoped<ISystemSettingService, SystemSettingService>();
+        services.AddScoped<ICategoryService, CategoryService>();
 
         return services;
     }

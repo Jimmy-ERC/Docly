@@ -35,6 +35,12 @@
                                 <a class="nav-link text-dark" asp-controller="Roles" asp-action="Index">Roles</a>
                             </li>
                         }
+                        @if (User.HasPermission(PermissionCodes.CategoriesManage))
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-controller="Categories" asp-action="Index">Categorías</a>
+                            </li>
+                        }
                         @if (User.HasPermission(PermissionCodes.SettingsManage))
                         {
                             <li class="nav-item">

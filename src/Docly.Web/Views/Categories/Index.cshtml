@@ -1,0 +1,37 @@
+@model Docly.Web.ViewModels.Categories.CategoryIndexViewModel
+@{
+    ViewData["Title"] = "Categorías";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="h3 mb-0">Categorías</h1>
+    <a asp-action="Create" class="btn btn-primary">Nueva categoría</a>
+</div>
+
+<div class="table-responsive">
+    <table class="table table-hover align-middle">
+        <thead>
+            <tr>
+                <th>Nombre</th>
+                <th>Descripción</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+        @foreach (var category in Model.Categories)
+        {
+            <tr>
+                <td><strong>@category.Name</strong></td>
+                <td>@category.Description</td>
+                <td class="text-end">
+                    <a asp-action="Edit" asp-route-id="@category.Id" class="btn btn-sm btn-outline-primary">Editar</a>
+                    <form asp-action="Delete" asp-route-id="@category.Id" method="post" class="d-inline"
+                          onsubmit="return confirm('¿Eliminar la categoría @category.Name?');">
+                        <button type="submit" class="btn btn-sm btn-outline-danger">Eliminar</button>
+                    </form>
+                </td>
+            </tr>
+        }
+        </tbody>
+    </table>
+</div>

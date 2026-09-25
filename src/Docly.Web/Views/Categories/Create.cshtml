@@ -1,0 +1,16 @@
+@model Docly.Web.ViewModels.Categories.CategoryFormViewModel
+@{
+    ViewData["Title"] = "Nueva categoría";
+}
+
+<h1 class="h3 mb-3">Nueva categoría</h1>
+
+<form asp-action="Create" method="post">
+    <partial name="_Form" model="Model" />
+    <button type="submit" class="btn btn-primary">Crear categoría</button>
+    <a asp-action="Index" class="btn btn-link">Cancelar</a>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

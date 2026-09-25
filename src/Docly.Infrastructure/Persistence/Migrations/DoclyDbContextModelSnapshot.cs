@@ -67,6 +67,32 @@ namespace Docly.Infrastructure.Persistence.Migrations
                     b.ToTable("RolePermissions", "docly");
                 });
 
+            modelBuilder.Entity("Docly.Domain.Categories.Category", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Name")
+                        .IsUnique();
+
+                    b.ToTable("Categories", "docly");
+                });
+
             modelBuilder.Entity("Docly.Domain.Settings.SystemSetting", b =>
                 {
                     b.Property<Guid>("Id")

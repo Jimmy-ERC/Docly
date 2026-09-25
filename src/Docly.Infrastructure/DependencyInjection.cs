@@ -1,8 +1,10 @@
 using Docly.Application.Authentication;
 using Docly.Application.Roles;
+using Docly.Application.Settings;
 using Docly.Application.Users;
 using Docly.Infrastructure.Identity;
 using Docly.Infrastructure.Persistence;
+using Docly.Infrastructure.Settings;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -63,6 +65,7 @@ public static class DependencyInjection
         services.AddScoped<IAuthService, AuthService>();
         services.AddScoped<IUserService, UserService>();
         services.AddScoped<IRoleService, RoleService>();
+        services.AddScoped<ISystemSettingService, SystemSettingService>();
 
         return services;
     }

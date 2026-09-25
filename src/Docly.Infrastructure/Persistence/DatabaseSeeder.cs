@@ -1,4 +1,5 @@
 using Docly.Domain.Authorization;
+using Docly.Domain.Settings;
 using Docly.Infrastructure.Identity;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -33,6 +34,7 @@ public static class DatabaseSeeder
 
         await SeedPermissionsAsync(db, cancellationToken);
         await SeedRolesAsync(db, provider.GetRequiredService<RoleManager<ApplicationRole>>(), cancellationToken);
+        await SeedSystemSettingsAsync(db, cancellationToken);
         await SeedAdminUserAsync(
             provider.GetRequiredService<UserManager<ApplicationUser>>(),
             provider.GetRequiredService<IConfiguration>(),
@@ -115,6 +117,33 @@ public static class DatabaseSeeder
 
             await db.SaveChangesAsync(cancellationToken);
         }
+    }
+
+    /// <summary>Only inserts settings that don't exist yet; never overwrites a value someone already changed.</summary>
+    private static async Task SeedSystemSettingsAsync(DoclyDbContext db, CancellationToken cancellationToken)
+    {
+        var existingKeys = await db.SystemSettings.Select(s => s.Key).ToListAsync(cancellationToken);
+
+        foreach (var definition in SystemSettingCatalog.Settings)
+        {
+            if (existingKeys.Contains(definition.Key))
+            {
+                continue;
+            }
+
+            db.SystemSettings.Add(new SystemSetting
+            {
+                Id = Guid.NewGuid(),
+                Key = definition.Key,
+                Name = definition.Name,
+                Description = definition.Description,
+                Type = definition.Type,
+                Value = definition.DefaultValue,
+                UpdatedAtUtc = DateTime.UtcNow,
+            });
+        }
+
+        await db.SaveChangesAsync(cancellationToken);
     }
 
     private static async Task SeedAdminUserAsync(

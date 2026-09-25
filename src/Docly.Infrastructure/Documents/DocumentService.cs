@@ -1,5 +1,6 @@
 using Docly.Application.Common;
 using Docly.Application.Documents;
+using Docly.Application.Processing;
 using Docly.Application.Storage;
 using Docly.Domain.Documents;
 using Docly.Infrastructure.Persistence;
@@ -11,11 +12,13 @@ public class DocumentService : IDocumentService
 {
     private readonly DoclyDbContext _db;
     private readonly IFileStorageService _storage;
+    private readonly IDocumentProcessingService _processing;
 
-    public DocumentService(DoclyDbContext db, IFileStorageService storage)
+    public DocumentService(DoclyDbContext db, IFileStorageService storage, IDocumentProcessingService processing)
     {
         _db = db;
         _storage = storage;
+        _processing = processing;
     }
 
     public async Task<PagedResult<DocumentListItemDto>> GetDocumentsAsync(
@@ -128,6 +131,9 @@ public class DocumentService : IDocumentService
             throw;
         }
 
+        // Best-effort: ProcessAsync records its own failures on the job, it never throws.
+        await _processing.ProcessAsync(documentId, cancellationToken);
+
         return Result<Guid>.Success(documentId);
     }
 
@@ -216,6 +222,9 @@ public class DocumentService : IDocumentService
         {
             await _storage.DeleteAsync(previousPath, CancellationToken.None);
         }
+
+        // The file changed, so the previous chunks no longer match its content.
+        await _processing.ProcessAsync(id, cancellationToken);
 
         return Result.Success();
     }

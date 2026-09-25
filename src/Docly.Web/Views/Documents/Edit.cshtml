@@ -1,6 +1,16 @@
+@using Docly.Domain.Documents
 @model Docly.Web.ViewModels.Documents.DocumentEditViewModel
 @{
     ViewData["Title"] = "Editar documento";
+
+    var (badgeClass, badgeText) = Model.Processing?.Status switch
+    {
+        DocumentProcessingStatus.Completed => ("bg-success", "Procesado"),
+        DocumentProcessingStatus.Failed => ("bg-danger", "Error al procesar"),
+        DocumentProcessingStatus.ExtractingText => ("bg-info text-dark", "Extrayendo texto…"),
+        DocumentProcessingStatus.Chunking => ("bg-info text-dark", "Fragmentando…"),
+        _ => ("bg-secondary", "Pendiente"),
+    };
 }
 
 <h1 class="h3 mb-3">Editar documento <span class="text-muted">@Model.Title</span></h1>
@@ -52,6 +62,24 @@
     <div class="col-auto">
         <button type="submit" class="btn btn-outline-secondary">Reemplazar</button>
     </div>
+</form>
+
+<hr class="my-4" />
+
+<h2 class="h5">Procesamiento (base de conocimiento)</h2>
+<p>
+    <span class="badge @badgeClass">@badgeText</span>
+    @if (Model.Processing is { Status: DocumentProcessingStatus.Completed })
+    {
+        <span class="text-muted">— @Model.Processing.ChunkCount fragmento(s), @Model.Processing.CompletedAtUtc?.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</span>
+    }
+</p>
+@if (Model.Processing is { Status: DocumentProcessingStatus.Failed })
+{
+    <p class="text-danger">@Model.Processing.ErrorMessage</p>
+}
+<form asp-action="Reprocess" asp-route-id="@Model.Id" method="post">
+    <button type="submit" class="btn btn-outline-secondary">Reprocesar</button>
 </form>
 
 @section Scripts {

@@ -170,6 +170,72 @@ namespace Docly.Infrastructure.Persistence.Migrations
                     b.ToTable("DocumentFiles", "docly");
                 });
 
+            modelBuilder.Entity("Docly.Domain.Documents.DocumentProcessingJob", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("ChunkCount")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime?>("CompletedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime>("CreatedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("DocumentId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("ErrorMessage")
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)");
+
+                    b.Property<DateTime?>("StartedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DocumentId")
+                        .IsUnique();
+
+                    b.ToTable("DocumentProcessingJobs", "docly");
+                });
+
+            modelBuilder.Entity("Docly.Domain.Documents.KnowledgeChunk", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("CharCount")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("ChunkIndex")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("CreatedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("DocumentId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DocumentId", "ChunkIndex")
+                        .IsUnique();
+
+                    b.ToTable("KnowledgeChunks", "docly");
+                });
+
             modelBuilder.Entity("Docly.Domain.Settings.SystemSetting", b =>
                 {
                     b.Property<Guid>("Id")
@@ -447,6 +513,24 @@ namespace Docly.Infrastructure.Persistence.Migrations
                 });
 
             modelBuilder.Entity("Docly.Domain.Documents.DocumentFile", b =>
+                {
+                    b.HasOne("Docly.Domain.Documents.Document", null)
+                        .WithMany()
+                        .HasForeignKey("DocumentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Docly.Domain.Documents.DocumentProcessingJob", b =>
+                {
+                    b.HasOne("Docly.Domain.Documents.Document", null)
+                        .WithMany()
+                        .HasForeignKey("DocumentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Docly.Domain.Documents.KnowledgeChunk", b =>
                 {
                     b.HasOne("Docly.Domain.Documents.Document", null)
                         .WithMany()

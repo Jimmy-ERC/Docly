@@ -22,8 +22,8 @@ public class DoclyDbContext : IdentityDbContext<ApplicationUser, ApplicationRole
     public DbSet<Category> Categories => Set<Category>();
     public DbSet<Document> Documents => Set<Document>();
     public DbSet<DocumentFile> DocumentFiles => Set<DocumentFile>();
-
-    // Other domain entities (KnowledgeChunk, DocumentProcessingJob...) will be added here as DbSet<T>.
+    public DbSet<DocumentProcessingJob> DocumentProcessingJobs => Set<DocumentProcessingJob>();
+    public DbSet<KnowledgeChunk> KnowledgeChunks => Set<KnowledgeChunk>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {

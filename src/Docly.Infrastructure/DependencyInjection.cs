@@ -1,16 +1,22 @@
+using System.Net.Http.Headers;
 using Docly.Application.Authentication;
 using Docly.Application.Categories;
+using Docly.Application.Documents;
 using Docly.Application.Roles;
 using Docly.Application.Settings;
+using Docly.Application.Storage;
 using Docly.Application.Users;
 using Docly.Infrastructure.Categories;
+using Docly.Infrastructure.Documents;
 using Docly.Infrastructure.Identity;
 using Docly.Infrastructure.Persistence;
 using Docly.Infrastructure.Settings;
+using Docly.Infrastructure.Storage;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using Pgvector.EntityFrameworkCore;
 
 namespace Docly.Infrastructure;
@@ -69,6 +75,25 @@ public static class DependencyInjection
         services.AddScoped<IRoleService, RoleService>();
         services.AddScoped<ISystemSettingService, SystemSettingService>();
         services.AddScoped<ICategoryService, CategoryService>();
+
+        services.Configure<SupabaseStorageOptions>(configuration.GetSection(SupabaseStorageOptions.SectionName));
+
+        services.AddHttpClient<IFileStorageService, SupabaseStorageService>((provider, client) =>
+        {
+            var options = provider.GetRequiredService<IOptions<SupabaseStorageOptions>>().Value;
+
+            if (string.IsNullOrWhiteSpace(options.Url) || string.IsNullOrWhiteSpace(options.ServiceRoleKey))
+            {
+                throw new InvalidOperationException(
+                    "'Supabase:Url' y 'Supabase:ServiceRoleKey' son obligatorios. Configúralos con dotnet user-secrets.");
+            }
+
+            client.BaseAddress = new Uri(options.Url.TrimEnd('/') + "/");
+            client.DefaultRequestHeaders.Add("apikey", options.ServiceRoleKey);
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", options.ServiceRoleKey);
+        });
+
+        services.AddScoped<IDocumentService, DocumentService>();
 
         return services;
     }

@@ -96,6 +96,11 @@ public class CategoryService : ICategoryService
             return Result.Failure("La categoría no existe.");
         }
 
+        if (await _db.Documents.AnyAsync(d => d.CategoryId == id, cancellationToken))
+        {
+            return Result.Failure("No se puede eliminar una categoría que tiene documentos asignados.");
+        }
+
         _db.Categories.Remove(category);
         await _db.SaveChangesAsync(cancellationToken);
 

@@ -2,6 +2,7 @@ using System.Net.Http.Headers;
 using Docly.Application.Authentication;
 using Docly.Application.Categories;
 using Docly.Application.Documents;
+using Docly.Application.Processing;
 using Docly.Application.Roles;
 using Docly.Application.Settings;
 using Docly.Application.Storage;
@@ -10,6 +11,7 @@ using Docly.Infrastructure.Categories;
 using Docly.Infrastructure.Documents;
 using Docly.Infrastructure.Identity;
 using Docly.Infrastructure.Persistence;
+using Docly.Infrastructure.Processing;
 using Docly.Infrastructure.Settings;
 using Docly.Infrastructure.Storage;
 using Microsoft.AspNetCore.Identity;
@@ -93,6 +95,8 @@ public static class DependencyInjection
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", options.ServiceRoleKey);
         });
 
+        services.AddScoped<ITextExtractionService, TextExtractionService>();
+        services.AddScoped<IDocumentProcessingService, DocumentProcessingService>();
         services.AddScoped<IDocumentService, DocumentService>();
 
         return services;

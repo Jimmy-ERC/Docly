@@ -1,6 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using Docly.Application.Common;
 using Docly.Application.Documents;
+using Docly.Application.Processing;
 using Microsoft.AspNetCore.Http;
 
 namespace Docly.Web.ViewModels.Documents;
@@ -57,6 +58,8 @@ public class DocumentEditViewModel
     public string FileName { get; set; } = string.Empty;
     public long SizeBytes { get; set; }
     public DateTime UploadedAtUtc { get; set; }
+
+    public DocumentProcessingStatusDto? Processing { get; set; }
 
     public IReadOnlyList<CategoryOption> Categories { get; set; } = [];
 }

@@ -1,5 +1,6 @@
 using Docly.Application.Categories;
 using Docly.Application.Documents;
+using Docly.Application.Processing;
 using Docly.Domain.Authorization;
 using Docly.Web.Authorization;
 using Docly.Web.ViewModels.Documents;
@@ -14,11 +15,15 @@ public class DocumentsController : Controller
 
     private readonly IDocumentService _documentService;
     private readonly ICategoryService _categoryService;
+    private readonly IDocumentProcessingService _processingService;
 
-    public DocumentsController(IDocumentService documentService, ICategoryService categoryService)
+    public DocumentsController(
+        IDocumentService documentService, ICategoryService categoryService,
+        IDocumentProcessingService processingService)
     {
         _documentService = documentService;
         _categoryService = categoryService;
+        _processingService = processingService;
     }
 
     [HttpGet]
@@ -87,6 +92,7 @@ public class DocumentsController : Controller
             FileName = document.FileName,
             SizeBytes = document.SizeBytes,
             UploadedAtUtc = document.UploadedAtUtc,
+            Processing = await _processingService.GetStatusAsync(id),
             Categories = await LoadCategoryOptionsAsync(),
         });
     }
@@ -132,6 +138,15 @@ public class DocumentsController : Controller
         }
 
         return RedirectToAction(nameof(Edit), new { id = model.Id });
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    [HasPermission(PermissionCodes.DocumentsEdit)]
+    public async Task<IActionResult> Reprocess(Guid id)
+    {
+        await _processingService.ProcessAsync(id);
+        return RedirectToAction(nameof(Edit), new { id });
     }
 
     [HttpGet]

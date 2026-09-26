@@ -2,14 +2,18 @@ using System.Net.Http.Headers;
 using Docly.Application.Authentication;
 using Docly.Application.Categories;
 using Docly.Application.Documents;
+using Docly.Application.Embeddings;
+using Docly.Application.KnowledgeBase;
 using Docly.Application.Processing;
 using Docly.Application.Roles;
 using Docly.Application.Settings;
 using Docly.Application.Storage;
 using Docly.Application.Users;
+using Docly.Infrastructure.Ai;
 using Docly.Infrastructure.Categories;
 using Docly.Infrastructure.Documents;
 using Docly.Infrastructure.Identity;
+using Docly.Infrastructure.KnowledgeBase;
 using Docly.Infrastructure.Persistence;
 using Docly.Infrastructure.Processing;
 using Docly.Infrastructure.Settings;
@@ -95,6 +99,17 @@ public static class DependencyInjection
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", options.ServiceRoleKey);
         });
 
+        services.Configure<GeminiOptions>(configuration.GetSection(GeminiOptions.SectionName));
+
+        // A missing 'Gemini:ApiKey' is reported by the service when embedding is attempted (so it lands on
+        // the processing job as a failure) instead of breaking every page that resolves this dependency.
+        services.AddHttpClient<IEmbeddingService, GeminiEmbeddingService>((provider, client) =>
+        {
+            var options = provider.GetRequiredService<IOptions<GeminiOptions>>().Value;
+            client.BaseAddress = new Uri(options.BaseUrl.TrimEnd('/') + "/");
+        });
+
+        services.AddScoped<IKnowledgeBaseService, KnowledgeBaseService>();
         services.AddScoped<ITextExtractionService, TextExtractionService>();
         services.AddScoped<IDocumentProcessingService, DocumentProcessingService>();
         services.AddScoped<IDocumentService, DocumentService>();

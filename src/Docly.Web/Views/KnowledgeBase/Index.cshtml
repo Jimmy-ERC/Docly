@@ -1,0 +1,97 @@
+@using Docly.Domain.Documents
+@model Docly.Web.ViewModels.KnowledgeBase.KnowledgeBaseIndexViewModel
+@{
+    ViewData["Title"] = "Base de conocimiento";
+}
+
+<h1 class="h3 mb-3">Base de conocimiento</h1>
+
+<div class="row g-3 mb-4">
+    <div class="col-6 col-md-3">
+        <div class="card text-center"><div class="card-body">
+            <div class="fs-3 fw-bold">@Model.Stats.IndexedDocumentCount / @Model.Stats.DocumentCount</div>
+            <div class="text-muted small">Documentos indexados</div>
+        </div></div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="card text-center"><div class="card-body">
+            <div class="fs-3 fw-bold">@Model.Stats.ChunkCount</div>
+            <div class="text-muted small">Fragmentos</div>
+        </div></div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="card text-center"><div class="card-body">
+            <div class="fs-3 fw-bold">@Model.Stats.EmbeddedChunkCount</div>
+            <div class="text-muted small">Con embedding</div>
+        </div></div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="card text-center"><div class="card-body">
+            <div class="fs-3 fw-bold @(Model.Stats.ChunkCount > Model.Stats.EmbeddedChunkCount ? "text-danger" : "")">@(Model.Stats.ChunkCount - Model.Stats.EmbeddedChunkCount)</div>
+            <div class="text-muted small">Sin embedding</div>
+        </div></div>
+    </div>
+</div>
+
+<div class="table-responsive">
+    <table class="table table-hover align-middle">
+        <thead>
+            <tr>
+                <th>Documento</th>
+                <th>Categoría</th>
+                <th>Estado</th>
+                <th class="text-end">Fragmentos</th>
+                <th class="text-end">Con embedding</th>
+                <th>Indexado</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+        @foreach (var document in Model.Documents.Items)
+        {
+            var (badgeClass, badgeText) = document.Status switch
+            {
+                DocumentProcessingStatus.Completed => ("bg-success", "Indexado"),
+                DocumentProcessingStatus.Failed => ("bg-danger", "Error"),
+                DocumentProcessingStatus.ExtractingText => ("bg-info text-dark", "Extrayendo texto…"),
+                DocumentProcessingStatus.Chunking => ("bg-info text-dark", "Fragmentando…"),
+                DocumentProcessingStatus.Embedding => ("bg-info text-dark", "Generando embeddings…"),
+                _ => ("bg-secondary", "Pendiente"),
+            };
+            <tr>
+                <td><strong>@document.Title</strong></td>
+                <td>@document.CategoryName</td>
+                <td><span class="badge @badgeClass">@badgeText</span></td>
+                <td class="text-end">@document.ChunkCount</td>
+                <td class="text-end">@document.EmbeddedChunkCount</td>
+                <td>@(document.IndexedAtUtc?.ToLocalTime().ToString("dd/MM/yyyy HH:mm") ?? "—")</td>
+                <td class="text-end">
+                    @if (document.ChunkCount > 0)
+                    {
+                        <a asp-action="Chunks" asp-route-id="@document.DocumentId" class="btn btn-sm btn-outline-primary">Ver fragmentos</a>
+                    }
+                </td>
+            </tr>
+        }
+        @if (Model.Documents.Items.Count == 0)
+        {
+            <tr><td colspan="7" class="text-center text-muted py-4">Todavía no hay documentos.</td></tr>
+        }
+        </tbody>
+    </table>
+</div>
+
+@if (Model.Documents.TotalPages > 1)
+{
+    <nav aria-label="Paginación">
+        <ul class="pagination">
+            <li class="page-item @(Model.Documents.HasPrevious ? "" : "disabled")">
+                <a class="page-link" asp-action="Index" asp-route-page="@(Model.Documents.Page - 1)">Anterior</a>
+            </li>
+            <li class="page-item disabled"><span class="page-link">@Model.Documents.Page / @Model.Documents.TotalPages</span></li>
+            <li class="page-item @(Model.Documents.HasNext ? "" : "disabled")">
+                <a class="page-link" asp-action="Index" asp-route-page="@(Model.Documents.Page + 1)">Siguiente</a>
+            </li>
+        </ul>
+    </nav>
+}

@@ -11,13 +11,13 @@ public sealed record DocumentProcessingStatusDto(
     DateTime? CompletedAtUtc);
 
 /// <summary>
-/// Orchestrates the extraction + chunking pipeline for a document's current file, and tracks its
-/// progress in a <see cref="DocumentProcessingJob"/>.
+/// Orchestrates the extraction + chunking + embedding pipeline for a document's current file, and tracks
+/// its progress in a <see cref="DocumentProcessingJob"/>.
 /// </summary>
 public interface IDocumentProcessingService
 {
     /// <summary>
-    /// Extracts and chunks the document's current file, replacing any previous chunks. Never throws:
+    /// Extracts, chunks and embeds the document's current file, replacing any previous chunks. Never throws:
     /// failures are recorded on the job (<see cref="DocumentProcessingStatus.Failed"/>) so the caller
     /// (upload/replace) can still succeed even if processing didn't.
     /// </summary>

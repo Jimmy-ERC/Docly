@@ -4,7 +4,8 @@ using Docly.Domain.Settings;
 namespace Docly.Application.Settings;
 
 public sealed record SystemSettingDto(
-    string Key, string Name, string? Description, SystemSettingType Type, string Value);
+    string Key, string Name, string? Description, SystemSettingType Type, string Value,
+    decimal? MinValue = null, decimal? MaxValue = null);
 
 public interface ISystemSettingService
 {

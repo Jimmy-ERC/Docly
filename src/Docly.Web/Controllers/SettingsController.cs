@@ -64,6 +64,8 @@ public class SettingsController : Controller
                     Description = s.Description,
                     Type = s.Type,
                     Value = s.Value,
+                    MinValue = s.MinValue,
+                    MaxValue = s.MaxValue,
                 })
                 .ToList(),
         };

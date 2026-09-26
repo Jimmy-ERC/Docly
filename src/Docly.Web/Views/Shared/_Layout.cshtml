@@ -41,6 +41,12 @@
                                 <a class="nav-link text-dark" asp-controller="Documents" asp-action="Index">Documentos</a>
                             </li>
                         }
+                        @if (User.HasPermission(PermissionCodes.DocumentsView))
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-controller="KnowledgeBase" asp-action="Index">Base de conocimiento</a>
+                            </li>
+                        }
                         @if (User.HasPermission(PermissionCodes.CategoriesManage))
                         {
                             <li class="nav-item">

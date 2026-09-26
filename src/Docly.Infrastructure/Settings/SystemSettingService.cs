@@ -21,11 +21,24 @@ public class SystemSettingService : ISystemSettingService
         var settings = await _db.SystemSettings.AsNoTracking().ToDictionaryAsync(s => s.Key, cancellationToken);
 
         return SystemSettingCatalog.Settings
-            .Select(definition => settings.TryGetValue(definition.Key, out var setting)
-                ? new SystemSettingDto(definition.Key, definition.Name, definition.Description, definition.Type, setting.Value)
-                : new SystemSettingDto(definition.Key, definition.Name, definition.Description, definition.Type, definition.DefaultValue))
+            .Select(definition =>
+            {
+                var (min, max) = GetBounds(definition);
+                var value = settings.TryGetValue(definition.Key, out var setting) ? setting.Value : definition.DefaultValue;
+
+                return new SystemSettingDto(
+                    definition.Key, definition.Name, definition.Description, definition.Type, value, min, max);
+            })
             .ToList();
     }
+
+    /// <summary>Effective inclusive bounds of a numeric setting (both null for text settings).</summary>
+    private static (decimal? Min, decimal? Max) GetBounds(SystemSettingDefinition definition) => definition.Type switch
+    {
+        SystemSettingType.Integer => (definition.MinValue ?? 1, definition.MaxValue),
+        SystemSettingType.Decimal => (definition.MinValue ?? 0, definition.MaxValue ?? 1),
+        _ => (null, null),
+    };
 
     public async Task<Result> UpdateAsync(
         IReadOnlyDictionary<string, string> values, Guid updatedByUserId, CancellationToken cancellationToken = default)
@@ -123,13 +136,16 @@ public class SystemSettingService : ISystemSettingService
         SystemSettingDefinition definition, string rawValue, out string normalized, out string? error)
     {
         rawValue = rawValue.Trim();
+        var (min, max) = GetBounds(definition);
 
         switch (definition.Type)
         {
             case SystemSettingType.Integer:
-                if (!int.TryParse(rawValue, NumberStyles.Integer, CultureInfo.InvariantCulture, out var intValue) || intValue <= 0)
+                if (!int.TryParse(rawValue, NumberStyles.Integer, CultureInfo.InvariantCulture, out var intValue)
+                    || intValue < min || intValue > (max ?? int.MaxValue))
                 {
-                    (normalized, error) = (string.Empty, "debe ser un número entero mayor que cero.");
+                    var range = max is null ? $"mayor o igual que {min}" : $"entre {min} y {max}";
+                    (normalized, error) = (string.Empty, $"debe ser un número entero {range}.");
                     return false;
                 }
                 (normalized, error) = (intValue.ToString(CultureInfo.InvariantCulture), null);
@@ -137,9 +153,9 @@ public class SystemSettingService : ISystemSettingService
 
             case SystemSettingType.Decimal:
                 if (!decimal.TryParse(rawValue, NumberStyles.Float, CultureInfo.InvariantCulture, out var decimalValue)
-                    || decimalValue < 0 || decimalValue > 1)
+                    || decimalValue < min || decimalValue > max)
                 {
-                    (normalized, error) = (string.Empty, "debe ser un número entre 0 y 1.");
+                    (normalized, error) = (string.Empty, $"debe ser un número entre {min} y {max}.");
                     return false;
                 }
                 (normalized, error) = (decimalValue.ToString(CultureInfo.InvariantCulture), null);

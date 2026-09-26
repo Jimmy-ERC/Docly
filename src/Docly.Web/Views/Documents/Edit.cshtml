@@ -9,6 +9,7 @@
         DocumentProcessingStatus.Failed => ("bg-danger", "Error al procesar"),
         DocumentProcessingStatus.ExtractingText => ("bg-info text-dark", "Extrayendo texto…"),
         DocumentProcessingStatus.Chunking => ("bg-info text-dark", "Fragmentando…"),
+        DocumentProcessingStatus.Embedding => ("bg-info text-dark", "Generando embeddings…"),
         _ => ("bg-secondary", "Pendiente"),
     };
 }
@@ -71,7 +72,8 @@
     <span class="badge @badgeClass">@badgeText</span>
     @if (Model.Processing is { Status: DocumentProcessingStatus.Completed })
     {
-        <span class="text-muted">— @Model.Processing.ChunkCount fragmento(s), @Model.Processing.CompletedAtUtc?.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</span>
+        <span class="text-muted">— @Model.Processing.ChunkCount fragmento(s) con embedding, @Model.Processing.CompletedAtUtc?.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</span>
+        <a asp-controller="KnowledgeBase" asp-action="Chunks" asp-route-id="@Model.Id">Ver fragmentos</a>
     }
 </p>
 @if (Model.Processing is { Status: DocumentProcessingStatus.Failed })

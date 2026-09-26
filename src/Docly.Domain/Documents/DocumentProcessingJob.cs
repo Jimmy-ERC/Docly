@@ -1,7 +1,7 @@
 namespace Docly.Domain.Documents;
 
 /// <summary>
-/// Tracks the extraction + chunking progress of a <see cref="Document"/>'s current file, so it can be
+/// Tracks the extraction + chunking + embedding progress of a <see cref="Document"/>'s current file, so it can be
 /// reported in the UI and re-run on demand. One row per document — reprocessing (a file replacement or
 /// a manual retry) resets this same row instead of accumulating history.
 /// </summary>

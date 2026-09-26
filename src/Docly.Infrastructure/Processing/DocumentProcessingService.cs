@@ -1,4 +1,5 @@
 using System.Globalization;
+using Docly.Application.Embeddings;
 using Docly.Application.Processing;
 using Docly.Application.Settings;
 using Docly.Application.Storage;
@@ -15,15 +16,17 @@ public class DocumentProcessingService : IDocumentProcessingService
     private readonly IFileStorageService _storage;
     private readonly ITextExtractionService _textExtraction;
     private readonly ISystemSettingService _settings;
+    private readonly IEmbeddingService _embedding;
 
     public DocumentProcessingService(
         DoclyDbContext db, IFileStorageService storage, ITextExtractionService textExtraction,
-        ISystemSettingService settings)
+        ISystemSettingService settings, IEmbeddingService embedding)
     {
         _db = db;
         _storage = storage;
         _textExtraction = textExtraction;
         _settings = settings;
+        _embedding = embedding;
     }
 
     public async Task ProcessAsync(Guid documentId, CancellationToken cancellationToken = default)
@@ -56,16 +59,18 @@ public class DocumentProcessingService : IDocumentProcessingService
             job.Status = DocumentProcessingStatus.Chunking;
             await _db.SaveChangesAsync(cancellationToken);
 
-            var (chunkSize, overlap) = await GetChunkSettingsAsync(cancellationToken);
-            var chunks = TextChunker.Chunk(markdown, chunkSize, overlap);
+            var settings = await _settings.GetAllAsync(cancellationToken);
+            var chunks = TextChunker.Chunk(
+                markdown, GetInt(settings, SystemSettingKeys.RagChunkSize), GetInt(settings, SystemSettingKeys.RagChunkOverlap));
 
             var existingChunks = _db.KnowledgeChunks.Where(c => c.DocumentId == documentId);
             _db.KnowledgeChunks.RemoveRange(existingChunks);
 
             var now = DateTime.UtcNow;
+            var newChunks = new List<KnowledgeChunk>(chunks.Count);
             for (var index = 0; index < chunks.Count; index++)
             {
-                _db.KnowledgeChunks.Add(new KnowledgeChunk
+                newChunks.Add(new KnowledgeChunk
                 {
                     Id = Guid.NewGuid(),
                     DocumentId = documentId,
@@ -76,9 +81,18 @@ public class DocumentProcessingService : IDocumentProcessingService
                 });
             }
 
+            _db.KnowledgeChunks.AddRange(newChunks);
+
+            // The chunks are saved before embedding, so a provider failure leaves the text indexed
+            // (browsable in the knowledge base) and only the vectors missing.
+            job.Status = DocumentProcessingStatus.Embedding;
+            job.ChunkCount = newChunks.Count;
+            await _db.SaveChangesAsync(cancellationToken);
+
+            await EmbedChunksAsync(newChunks, GetInt(settings, SystemSettingKeys.RagEmbeddingBatchSize), cancellationToken);
+
             job.Status = DocumentProcessingStatus.Completed;
-            job.ChunkCount = chunks.Count;
-            job.CompletedAtUtc = now;
+            job.CompletedAtUtc = DateTime.UtcNow;
 
             await _db.SaveChangesAsync(cancellationToken);
         }
@@ -103,16 +117,24 @@ public class DocumentProcessingService : IDocumentProcessingService
                 job.DocumentId, job.Status, job.ErrorMessage, job.ChunkCount, job.StartedAtUtc, job.CompletedAtUtc);
     }
 
-    private async Task<(int ChunkSize, int Overlap)> GetChunkSettingsAsync(CancellationToken cancellationToken)
+    /// <summary>Embeds the chunks in batches, saving after each one so completed batches survive a later failure.</summary>
+    private async Task EmbedChunksAsync(
+        IReadOnlyList<KnowledgeChunk> chunks, int batchSize, CancellationToken cancellationToken)
     {
-        var settings = await _settings.GetAllAsync(cancellationToken);
+        foreach (var batch in chunks.Chunk(batchSize))
+        {
+            var vectors = await _embedding.EmbedDocumentsAsync(
+                batch.Select(c => c.Content).ToList(), cancellationToken);
 
-        var chunkSize = ParseInt(settings, SystemSettingKeys.RagChunkSize);
-        var overlap = ParseInt(settings, SystemSettingKeys.RagChunkOverlap);
+            for (var i = 0; i < batch.Length; i++)
+            {
+                batch[i].Embedding = vectors[i];
+            }
 
-        return (chunkSize, overlap);
+            await _db.SaveChangesAsync(cancellationToken);
+        }
     }
 
-    private static int ParseInt(IReadOnlyList<SystemSettingDto> settings, string key) =>
+    private static int GetInt(IReadOnlyList<SystemSettingDto> settings, string key) =>
         int.Parse(settings.First(s => s.Key == key).Value, CultureInfo.InvariantCulture);
 }

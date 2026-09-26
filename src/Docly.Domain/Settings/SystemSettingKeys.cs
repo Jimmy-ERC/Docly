@@ -18,6 +18,9 @@ public static class SystemSettingKeys
     /// <summary>Minimum cosine similarity (0-1) a chunk needs to be considered relevant.</summary>
     public const string RagSimilarityThreshold = "rag.similarity_threshold";
 
+    /// <summary>How many chunks are sent to the embedding provider per request while indexing a document.</summary>
+    public const string RagEmbeddingBatchSize = "rag.embedding_batch_size";
+
     /// <summary>Maximum upload size, in megabytes, enforced by the application (in addition to the bucket limit).</summary>
     public const string DocumentsMaxUploadSizeMb = "documents.max_upload_size_mb";
 }

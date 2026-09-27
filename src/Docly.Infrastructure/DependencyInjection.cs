@@ -7,6 +7,7 @@ using Docly.Application.Chat;
 using Docly.Application.Documents;
 using Docly.Application.Embeddings;
 using Docly.Application.KnowledgeBase;
+using Docly.Application.Notifications;
 using Docly.Application.Processing;
 using Docly.Application.Retrieval;
 using Docly.Application.Roles;
@@ -21,6 +22,7 @@ using Docly.Infrastructure.Chat;
 using Docly.Infrastructure.Documents;
 using Docly.Infrastructure.Identity;
 using Docly.Infrastructure.KnowledgeBase;
+using Docly.Infrastructure.Notifications;
 using Docly.Infrastructure.Persistence;
 using Docly.Infrastructure.Processing;
 using Docly.Infrastructure.Retrieval;
@@ -91,6 +93,7 @@ public static class DependencyInjection
         services.AddScoped<ISystemSettingService, SystemSettingService>();
         services.AddScoped<ICategoryService, CategoryService>();
         services.AddScoped<IAuditService, AuditService>();
+        services.AddScoped<INotificationService, NotificationService>();
 
         services.Configure<SupabaseStorageOptions>(configuration.GetSection(SupabaseStorageOptions.SectionName));
 

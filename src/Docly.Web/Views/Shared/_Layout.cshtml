@@ -78,6 +78,7 @@
                     <ul class="navbar-nav">
                         @if (User.Identity?.IsAuthenticated == true)
                         {
+                            <vc:notification-bell />
                             <li class="nav-item d-flex align-items-center me-2">
                                 <span class="navbar-text text-dark">@User.GetDisplayName()</span>
                             </li>

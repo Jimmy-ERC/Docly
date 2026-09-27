@@ -1,9 +1,11 @@
 using System.Globalization;
 using Docly.Application.Embeddings;
+using Docly.Application.Notifications;
 using Docly.Application.Processing;
 using Docly.Application.Settings;
 using Docly.Application.Storage;
 using Docly.Domain.Documents;
+using Docly.Domain.Notifications;
 using Docly.Domain.Settings;
 using Docly.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
@@ -17,16 +19,18 @@ public class DocumentProcessingService : IDocumentProcessingService
     private readonly ITextExtractionService _textExtraction;
     private readonly ISystemSettingService _settings;
     private readonly IEmbeddingService _embedding;
+    private readonly INotificationService _notifications;
 
     public DocumentProcessingService(
         DoclyDbContext db, IFileStorageService storage, ITextExtractionService textExtraction,
-        ISystemSettingService settings, IEmbeddingService embedding)
+        ISystemSettingService settings, IEmbeddingService embedding, INotificationService notifications)
     {
         _db = db;
         _storage = storage;
         _textExtraction = textExtraction;
         _settings = settings;
         _embedding = embedding;
+        _notifications = notifications;
     }
 
     public async Task ProcessAsync(Guid documentId, CancellationToken cancellationToken = default)
@@ -34,6 +38,13 @@ public class DocumentProcessingService : IDocumentProcessingService
         var file = await _db.DocumentFiles.AsNoTracking()
             .FirstOrDefaultAsync(f => f.DocumentId == documentId, cancellationToken);
         if (file is null)
+        {
+            return;
+        }
+
+        var document = await _db.Documents.AsNoTracking()
+            .FirstOrDefaultAsync(d => d.Id == documentId, cancellationToken);
+        if (document is null)
         {
             return;
         }
@@ -95,6 +106,11 @@ public class DocumentProcessingService : IDocumentProcessingService
             job.CompletedAtUtc = DateTime.UtcNow;
 
             await _db.SaveChangesAsync(cancellationToken);
+
+            await _notifications.CreateAsync(
+                document.OwnerUserId, NotificationTypes.DocumentProcessingCompleted, "Documento procesado",
+                $"El documento \"{document.Title}\" se procesó correctamente y ya está disponible en la base de conocimiento.",
+                $"/Documents/Edit/{documentId}", cancellationToken);
         }
         catch (Exception ex) when (ex is not OperationCanceledException)
         {
@@ -102,6 +118,11 @@ public class DocumentProcessingService : IDocumentProcessingService
             job.ErrorMessage = ex.Message.Length > 2000 ? ex.Message[..2000] : ex.Message;
 
             await _db.SaveChangesAsync(CancellationToken.None);
+
+            await _notifications.CreateAsync(
+                document.OwnerUserId, NotificationTypes.DocumentProcessingFailed, "Error al procesar documento",
+                $"El documento \"{document.Title}\" no pudo procesarse: {job.ErrorMessage}",
+                $"/Documents/Edit/{documentId}", CancellationToken.None);
         }
     }
 

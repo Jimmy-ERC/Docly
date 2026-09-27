@@ -13,11 +13,14 @@ public sealed record ChatMessageDto(Guid Id, bool IsUser, string Content, DateTi
 /// </summary>
 public interface IChatService
 {
-    /// <summary>The caller's most recently updated session, creating one if they have none yet. Doubles
-    /// as "the active session" until feature/historial-conversaciones adds a way to pick one explicitly.</summary>
+    /// <summary>The caller's most recently updated session, creating one if they have none yet. Used as
+    /// the active session when none was picked explicitly from <see cref="GetSessionsAsync"/>.</summary>
     Task<ChatSessionDto> GetOrCreateActiveSessionAsync(Guid userId, CancellationToken cancellationToken = default);
 
     Task<ChatSessionDto> StartNewSessionAsync(Guid userId, CancellationToken cancellationToken = default);
+
+    /// <summary>The caller's sessions, most recently updated first, for the conversation history list.</summary>
+    Task<IReadOnlyList<ChatSessionDto>> GetSessionsAsync(Guid userId, CancellationToken cancellationToken = default);
 
     /// <summary>Null if the session doesn't exist or doesn't belong to <paramref name="userId"/>.</summary>
     Task<ChatSessionDto?> GetSessionAsync(Guid sessionId, Guid userId, CancellationToken cancellationToken = default);
@@ -28,4 +31,8 @@ public interface IChatService
 
     Task<Result<ChatMessageDto>> AskAsync(
         Guid sessionId, Guid userId, string question, Guid? categoryId, CancellationToken cancellationToken = default);
+
+    /// <summary>Deletes a session and its messages. Fails if it doesn't exist or doesn't belong to
+    /// <paramref name="userId"/>.</summary>
+    Task<Result> DeleteSessionAsync(Guid sessionId, Guid userId, CancellationToken cancellationToken = default);
 }

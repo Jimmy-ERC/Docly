@@ -49,6 +49,16 @@ public class ChatService : IChatService
     public Task<ChatSessionDto> StartNewSessionAsync(Guid userId, CancellationToken cancellationToken = default) =>
         CreateSessionAsync(userId, cancellationToken);
 
+    public async Task<IReadOnlyList<ChatSessionDto>> GetSessionsAsync(
+        Guid userId, CancellationToken cancellationToken = default)
+    {
+        return await _db.ChatSessions.AsNoTracking()
+            .Where(s => s.UserId == userId)
+            .OrderByDescending(s => s.UpdatedAtUtc)
+            .Select(s => new ChatSessionDto(s.Id, s.Title, s.UpdatedAtUtc))
+            .ToListAsync(cancellationToken);
+    }
+
     public async Task<ChatSessionDto?> GetSessionAsync(
         Guid sessionId, Guid userId, CancellationToken cancellationToken = default)
     {
@@ -140,6 +150,21 @@ public class ChatService : IChatService
         await _db.SaveChangesAsync(cancellationToken);
 
         return Result<ChatMessageDto>.Success(new ChatMessageDto(assistantMessage.Id, false, answer, answeredAt));
+    }
+
+    public async Task<Result> DeleteSessionAsync(Guid sessionId, Guid userId, CancellationToken cancellationToken = default)
+    {
+        var session = await _db.ChatSessions
+            .FirstOrDefaultAsync(s => s.Id == sessionId && s.UserId == userId, cancellationToken);
+        if (session is null)
+        {
+            return Result.Failure("La conversación no existe.");
+        }
+
+        _db.ChatSessions.Remove(session);
+        await _db.SaveChangesAsync(cancellationToken);
+
+        return Result.Success();
     }
 
     private async Task<ChatSessionDto> CreateSessionAsync(Guid userId, CancellationToken cancellationToken)

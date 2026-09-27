@@ -12,7 +12,7 @@ public class ChatSession
 
     public DateTime CreatedAtUtc { get; set; }
 
-    /// <summary>Bumped on every new message; lets "most recent session" double as "active session"
-    /// until feature/historial-conversaciones adds a way to switch between sessions explicitly.</summary>
+    /// <summary>Bumped on every new message; determines both the default "active session" and the
+    /// ordering of the conversation history list.</summary>
     public DateTime UpdatedAtUtc { get; set; }
 }

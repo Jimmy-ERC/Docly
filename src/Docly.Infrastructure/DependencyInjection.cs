@@ -5,6 +5,7 @@ using Docly.Application.Documents;
 using Docly.Application.Embeddings;
 using Docly.Application.KnowledgeBase;
 using Docly.Application.Processing;
+using Docly.Application.Retrieval;
 using Docly.Application.Roles;
 using Docly.Application.Search;
 using Docly.Application.Settings;
@@ -17,6 +18,7 @@ using Docly.Infrastructure.Identity;
 using Docly.Infrastructure.KnowledgeBase;
 using Docly.Infrastructure.Persistence;
 using Docly.Infrastructure.Processing;
+using Docly.Infrastructure.Retrieval;
 using Docly.Infrastructure.Search;
 using Docly.Infrastructure.Settings;
 using Docly.Infrastructure.Storage;
@@ -116,6 +118,7 @@ public static class DependencyInjection
         services.AddScoped<IDocumentProcessingService, DocumentProcessingService>();
         services.AddScoped<IDocumentService, DocumentService>();
         services.AddScoped<IHybridSearchService, HybridSearchService>();
+        services.AddScoped<IContextRetrievalService, ContextRetrievalService>();
 
         return services;
     }

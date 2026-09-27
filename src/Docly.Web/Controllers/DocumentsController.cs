@@ -106,7 +106,8 @@ public class DocumentsController : Controller
 
         if (ModelState.IsValid)
         {
-            var result = await _documentService.UpdateMetadataAsync(id, model.Title, model.Description, model.CategoryId);
+            var result = await _documentService.UpdateMetadataAsync(
+                id, model.Title, model.Description, model.CategoryId, User.GetUserId());
             if (result.Succeeded)
             {
                 TempData["Success"] = "Documento actualizado.";
@@ -166,7 +167,7 @@ public class DocumentsController : Controller
     [HasPermission(PermissionCodes.DocumentsDelete)]
     public async Task<IActionResult> Delete(Guid id)
     {
-        var result = await _documentService.DeleteAsync(id);
+        var result = await _documentService.DeleteAsync(id, User.GetUserId());
 
         TempData[result.Succeeded ? "Success" : "Error"] =
             result.Succeeded ? "Documento eliminado." : string.Join(" ", result.Errors);

@@ -1,5 +1,6 @@
 using System.Net.Http.Headers;
 using Docly.Application.Ai;
+using Docly.Application.Audit;
 using Docly.Application.Authentication;
 using Docly.Application.Categories;
 using Docly.Application.Chat;
@@ -14,6 +15,7 @@ using Docly.Application.Settings;
 using Docly.Application.Storage;
 using Docly.Application.Users;
 using Docly.Infrastructure.Ai;
+using Docly.Infrastructure.Audit;
 using Docly.Infrastructure.Categories;
 using Docly.Infrastructure.Chat;
 using Docly.Infrastructure.Documents;
@@ -88,6 +90,7 @@ public static class DependencyInjection
         services.AddScoped<IRoleService, RoleService>();
         services.AddScoped<ISystemSettingService, SystemSettingService>();
         services.AddScoped<ICategoryService, CategoryService>();
+        services.AddScoped<IAuditService, AuditService>();
 
         services.Configure<SupabaseStorageOptions>(configuration.GetSection(SupabaseStorageOptions.SectionName));
 

@@ -1,4 +1,5 @@
-﻿using Docly.Domain.Authorization;
+﻿using Docly.Domain.Audit;
+using Docly.Domain.Authorization;
 using Docly.Domain.Categories;
 using Docly.Domain.Chat;
 using Docly.Domain.Documents;
@@ -28,6 +29,7 @@ public class DoclyDbContext : IdentityDbContext<ApplicationUser, ApplicationRole
     public DbSet<ChatSession> ChatSessions => Set<ChatSession>();
     public DbSet<ChatMessage> ChatMessages => Set<ChatMessage>();
     public DbSet<MessageSource> MessageSources => Set<MessageSource>();
+    public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {

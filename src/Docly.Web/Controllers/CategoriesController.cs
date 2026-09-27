@@ -34,7 +34,7 @@ public class CategoriesController : Controller
     {
         if (ModelState.IsValid)
         {
-            var result = await _categoryService.CreateAsync(model.Name, model.Description);
+            var result = await _categoryService.CreateAsync(model.Name, model.Description, User.GetUserId());
             if (result.Succeeded)
             {
                 TempData["Success"] = $"Categoría '{model.Name.Trim()}' creada.";
@@ -72,7 +72,7 @@ public class CategoriesController : Controller
 
         if (ModelState.IsValid)
         {
-            var result = await _categoryService.UpdateAsync(id, model.Name, model.Description);
+            var result = await _categoryService.UpdateAsync(id, model.Name, model.Description, User.GetUserId());
             if (result.Succeeded)
             {
                 TempData["Success"] = $"Categoría '{model.Name.Trim()}' actualizada.";
@@ -89,7 +89,7 @@ public class CategoriesController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Delete(Guid id)
     {
-        var result = await _categoryService.DeleteAsync(id);
+        var result = await _categoryService.DeleteAsync(id, User.GetUserId());
 
         if (result.Succeeded)
         {

@@ -1,0 +1,68 @@
+@using Docly.Domain.Audit
+@model Docly.Web.ViewModels.Audit.AuditLogIndexViewModel
+@{
+    ViewData["Title"] = "Auditoría";
+}
+
+<h1 class="h3 mb-3">Auditoría</h1>
+
+<form method="get" class="row g-2 mb-3">
+    <div class="col-sm-6 col-md-3">
+        <select name="entityType" class="form-select" onchange="this.form.submit()">
+            <option value="">Todos los tipos</option>
+            <option value="@AuditEntityTypes.Document" selected="@(Model.EntityType == AuditEntityTypes.Document)">Documentos</option>
+            <option value="@AuditEntityTypes.Category" selected="@(Model.EntityType == AuditEntityTypes.Category)">Categorías</option>
+        </select>
+    </div>
+    @if (!string.IsNullOrWhiteSpace(Model.EntityType))
+    {
+        <div class="col-auto">
+            <a asp-action="Index" class="btn btn-link">Limpiar</a>
+        </div>
+    }
+</form>
+
+<div class="table-responsive">
+    <table class="table table-hover align-middle">
+        <thead>
+            <tr>
+                <th>Fecha</th>
+                <th>Usuario</th>
+                <th>Acción</th>
+                <th>Tipo</th>
+                <th>Detalle</th>
+            </tr>
+        </thead>
+        <tbody>
+        @foreach (var log in Model.Logs.Items)
+        {
+            <tr>
+                <td>@log.CreatedAtUtc.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</td>
+                <td>@(log.UserFullName ?? "Sistema")</td>
+                <td>@log.Action</td>
+                <td>@log.EntityType</td>
+                <td>@log.Details</td>
+            </tr>
+        }
+        @if (Model.Logs.Items.Count == 0)
+        {
+            <tr><td colspan="5" class="text-center text-muted py-4">No hay eventos registrados.</td></tr>
+        }
+        </tbody>
+    </table>
+</div>
+
+@if (Model.Logs.TotalPages > 1)
+{
+    <nav aria-label="Paginación">
+        <ul class="pagination">
+            <li class="page-item @(Model.Logs.HasPrevious ? "" : "disabled")">
+                <a class="page-link" asp-action="Index" asp-route-entityType="@Model.EntityType" asp-route-page="@(Model.Logs.Page - 1)">Anterior</a>
+            </li>
+            <li class="page-item disabled"><span class="page-link">@Model.Logs.Page / @Model.Logs.TotalPages</span></li>
+            <li class="page-item @(Model.Logs.HasNext ? "" : "disabled")">
+                <a class="page-link" asp-action="Index" asp-route-entityType="@Model.EntityType" asp-route-page="@(Model.Logs.Page + 1)">Siguiente</a>
+            </li>
+        </ul>
+    </nav>
+}

@@ -68,6 +68,12 @@
                                 <a class="nav-link text-dark" asp-controller="Settings" asp-action="Index">Configuración</a>
                             </li>
                         }
+                        @if (User.HasPermission(PermissionCodes.AuditView))
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-controller="Audit" asp-action="Index">Auditoría</a>
+                            </li>
+                        }
                     </ul>
                     <ul class="navbar-nav">
                         @if (User.Identity?.IsAuthenticated == true)

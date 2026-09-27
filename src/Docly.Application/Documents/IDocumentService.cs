@@ -43,14 +43,15 @@ public interface IDocumentService
 
     /// <summary>Updates title/description/category only, the file is untouched.</summary>
     Task<Result> UpdateMetadataAsync(
-        Guid id, string title, string? description, Guid categoryId, CancellationToken cancellationToken = default);
+        Guid id, string title, string? description, Guid categoryId, Guid actorUserId,
+        CancellationToken cancellationToken = default);
 
     /// <summary>Replaces the current file in Storage and updates the DocumentFile row.</summary>
     Task<Result> ReplaceFileAsync(
         Guid id, Guid uploadedByUserId, UploadDocumentFile file, CancellationToken cancellationToken = default);
 
     /// <summary>Deletes the Document, its DocumentFile row and the object in Storage.</summary>
-    Task<Result> DeleteAsync(Guid id, CancellationToken cancellationToken = default);
+    Task<Result> DeleteAsync(Guid id, Guid actorUserId, CancellationToken cancellationToken = default);
 
     /// <summary>Opens the current file for reading, for controller-side download.</summary>
     Task<(Stream Content, string FileName, string ContentType)?> OpenFileAsync(

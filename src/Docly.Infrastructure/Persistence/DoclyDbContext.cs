@@ -27,6 +27,7 @@ public class DoclyDbContext : IdentityDbContext<ApplicationUser, ApplicationRole
     public DbSet<KnowledgeChunk> KnowledgeChunks => Set<KnowledgeChunk>();
     public DbSet<ChatSession> ChatSessions => Set<ChatSession>();
     public DbSet<ChatMessage> ChatMessages => Set<ChatMessage>();
+    public DbSet<MessageSource> MessageSources => Set<MessageSource>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {

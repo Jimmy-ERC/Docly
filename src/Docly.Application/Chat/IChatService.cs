@@ -4,7 +4,15 @@ namespace Docly.Application.Chat;
 
 public sealed record ChatSessionDto(Guid Id, string Title, DateTime UpdatedAtUtc);
 
-public sealed record ChatMessageDto(Guid Id, bool IsUser, string Content, DateTime CreatedAtUtc);
+/// <summary>One knowledge chunk cited for a <see cref="ChatMessageDto"/>, in the order it was numbered
+/// as "[Fuente N]" in the prompt.</summary>
+public sealed record MessageSourceDto(
+    Guid Id, int Order, Guid DocumentId, string DocumentTitle, string CategoryName, int ChunkIndex, string Content);
+
+/// <summary><see cref="Sources"/> is empty for user messages; for assistant messages it lists the chunks
+/// the answer cited, if any were found.</summary>
+public sealed record ChatMessageDto(
+    Guid Id, bool IsUser, string Content, DateTime CreatedAtUtc, IReadOnlyList<MessageSourceDto> Sources);
 
 /// <summary>
 /// Drives a conversation: persists <see cref="Docly.Domain.Chat.ChatMessage"/>s, retrieves RAG context

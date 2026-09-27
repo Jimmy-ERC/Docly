@@ -1,6 +1,8 @@
 using System.Net.Http.Headers;
+using Docly.Application.Ai;
 using Docly.Application.Authentication;
 using Docly.Application.Categories;
+using Docly.Application.Chat;
 using Docly.Application.Documents;
 using Docly.Application.Embeddings;
 using Docly.Application.KnowledgeBase;
@@ -13,6 +15,7 @@ using Docly.Application.Storage;
 using Docly.Application.Users;
 using Docly.Infrastructure.Ai;
 using Docly.Infrastructure.Categories;
+using Docly.Infrastructure.Chat;
 using Docly.Infrastructure.Documents;
 using Docly.Infrastructure.Identity;
 using Docly.Infrastructure.KnowledgeBase;
@@ -119,6 +122,13 @@ public static class DependencyInjection
         services.AddScoped<IDocumentService, DocumentService>();
         services.AddScoped<IHybridSearchService, HybridSearchService>();
         services.AddScoped<IContextRetrievalService, ContextRetrievalService>();
+
+        services.AddHttpClient<ICompletionService, GeminiCompletionService>((provider, client) =>
+        {
+            var options = provider.GetRequiredService<IOptions<GeminiOptions>>().Value;
+            client.BaseAddress = new Uri(options.BaseUrl.TrimEnd('/') + "/");
+        });
+        services.AddScoped<IChatService, ChatService>();
 
         return services;
     }

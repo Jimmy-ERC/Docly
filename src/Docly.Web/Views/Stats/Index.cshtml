@@ -1,0 +1,84 @@
+@using Docly.Domain.Documents
+@model Docly.Application.Statistics.StatsDashboardDto
+@{
+    ViewData["Title"] = "Estadísticas";
+}
+
+<h1 class="h3 mb-3">Estadísticas</h1>
+
+<div class="row g-3 mb-4">
+    <div class="col-sm-6 col-lg-4">
+        <div class="card text-center h-100">
+            <div class="card-body">
+                <div class="display-6">@Model.TotalDocuments</div>
+                <div class="text-muted">Documentos totales</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-lg-4">
+        <div class="card text-center h-100">
+            <div class="card-body">
+                <div class="display-6">@Model.AuditEventsLast7Days</div>
+                <div class="text-muted">Eventos de auditoría (últimos 7 días)</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-lg-4">
+        <div class="card text-center h-100">
+            <div class="card-body">
+                <div class="display-6">@Model.NotificationsSentLast7Days</div>
+                <div class="text-muted">Notificaciones enviadas (últimos 7 días)</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3">
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-header">Documentos por categoría</div>
+            <ul class="list-group list-group-flush">
+                @foreach (var item in Model.DocumentsByCategory)
+                {
+                    <li class="list-group-item d-flex justify-content-between">
+                        <span>@item.CategoryName</span>
+                        <span class="badge bg-secondary rounded-pill">@item.Count</span>
+                    </li>
+                }
+                @if (Model.DocumentsByCategory.Count == 0)
+                {
+                    <li class="list-group-item text-center text-muted">No hay documentos aún.</li>
+                }
+            </ul>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-header">Documentos por estado de procesamiento</div>
+            <ul class="list-group list-group-flush">
+                @foreach (var item in Model.DocumentsByStatus)
+                {
+                    var label = item.Status switch
+                    {
+                        DocumentProcessingStatus.Completed => "Procesado",
+                        DocumentProcessingStatus.Failed => "Error al procesar",
+                        DocumentProcessingStatus.ExtractingText => "Extrayendo texto",
+                        DocumentProcessingStatus.Chunking => "Fragmentando",
+                        DocumentProcessingStatus.Embedding => "Generando embeddings",
+                        DocumentProcessingStatus.Pending => "Pendiente",
+                        null => "Sin procesar",
+                        _ => item.Status.ToString(),
+                    };
+                    <li class="list-group-item d-flex justify-content-between">
+                        <span>@label</span>
+                        <span class="badge bg-secondary rounded-pill">@item.Count</span>
+                    </li>
+                }
+                @if (Model.DocumentsByStatus.Count == 0)
+                {
+                    <li class="list-group-item text-center text-muted">No hay documentos aún.</li>
+                }
+            </ul>
+        </div>
+    </div>
+</div>

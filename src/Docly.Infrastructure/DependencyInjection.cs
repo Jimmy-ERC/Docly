@@ -13,6 +13,7 @@ using Docly.Application.Retrieval;
 using Docly.Application.Roles;
 using Docly.Application.Search;
 using Docly.Application.Settings;
+using Docly.Application.Statistics;
 using Docly.Application.Storage;
 using Docly.Application.Users;
 using Docly.Infrastructure.Ai;
@@ -28,6 +29,7 @@ using Docly.Infrastructure.Processing;
 using Docly.Infrastructure.Retrieval;
 using Docly.Infrastructure.Search;
 using Docly.Infrastructure.Settings;
+using Docly.Infrastructure.Statistics;
 using Docly.Infrastructure.Storage;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -94,6 +96,7 @@ public static class DependencyInjection
         services.AddScoped<ICategoryService, CategoryService>();
         services.AddScoped<IAuditService, AuditService>();
         services.AddScoped<INotificationService, NotificationService>();
+        services.AddScoped<IStatsService, StatsService>();
 
         services.Configure<SupabaseStorageOptions>(configuration.GetSection(SupabaseStorageOptions.SectionName));
 

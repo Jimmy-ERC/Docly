@@ -11,5 +11,5 @@ public class SearchViewModel
     public IReadOnlyList<CategoryOption> Categories { get; set; } = [];
 
     /// <summary>Null until the user submits a query.</summary>
-    public SemanticSearchResultDto? Result { get; set; }
+    public HybridSearchResultDto? Result { get; set; }
 }

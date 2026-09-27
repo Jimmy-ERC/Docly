@@ -1,7 +1,9 @@
+using Docly.Application.Audit;
 using Docly.Application.Common;
 using Docly.Application.Documents;
 using Docly.Application.Processing;
 using Docly.Application.Storage;
+using Docly.Domain.Audit;
 using Docly.Domain.Documents;
 using Docly.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
@@ -13,12 +15,15 @@ public class DocumentService : IDocumentService
     private readonly DoclyDbContext _db;
     private readonly IFileStorageService _storage;
     private readonly IDocumentProcessingService _processing;
+    private readonly IAuditService _audit;
 
-    public DocumentService(DoclyDbContext db, IFileStorageService storage, IDocumentProcessingService processing)
+    public DocumentService(
+        DoclyDbContext db, IFileStorageService storage, IDocumentProcessingService processing, IAuditService audit)
     {
         _db = db;
         _storage = storage;
         _processing = processing;
+        _audit = audit;
     }
 
     public async Task<PagedResult<DocumentListItemDto>> GetDocumentsAsync(
@@ -134,11 +139,16 @@ public class DocumentService : IDocumentService
         // Best-effort: ProcessAsync records its own failures on the job, it never throws.
         await _processing.ProcessAsync(documentId, cancellationToken);
 
+        await _audit.LogAsync(
+            ownerUserId, AuditActions.DocumentCreated, AuditEntityTypes.Document, documentId, title,
+            cancellationToken);
+
         return Result<Guid>.Success(documentId);
     }
 
     public async Task<Result> UpdateMetadataAsync(
-        Guid id, string title, string? description, Guid categoryId, CancellationToken cancellationToken = default)
+        Guid id, string title, string? description, Guid categoryId, Guid actorUserId,
+        CancellationToken cancellationToken = default)
     {
         var document = await _db.Documents.FirstOrDefaultAsync(d => d.Id == id, cancellationToken);
         if (document is null)
@@ -163,6 +173,10 @@ public class DocumentService : IDocumentService
         document.UpdatedAtUtc = DateTime.UtcNow;
 
         await _db.SaveChangesAsync(cancellationToken);
+
+        await _audit.LogAsync(
+            actorUserId, AuditActions.DocumentUpdated, AuditEntityTypes.Document, id, title, cancellationToken);
+
         return Result.Success();
     }
 
@@ -226,10 +240,14 @@ public class DocumentService : IDocumentService
         // The file changed, so the previous chunks no longer match its content.
         await _processing.ProcessAsync(id, cancellationToken);
 
+        await _audit.LogAsync(
+            uploadedByUserId, AuditActions.DocumentFileReplaced, AuditEntityTypes.Document, id, file.FileName,
+            cancellationToken);
+
         return Result.Success();
     }
 
-    public async Task<Result> DeleteAsync(Guid id, CancellationToken cancellationToken = default)
+    public async Task<Result> DeleteAsync(Guid id, Guid actorUserId, CancellationToken cancellationToken = default)
     {
         var document = await _db.Documents.FirstOrDefaultAsync(d => d.Id == id, cancellationToken);
         if (document is null)
@@ -246,6 +264,10 @@ public class DocumentService : IDocumentService
         {
             await _storage.DeleteAsync(file.StoragePath, CancellationToken.None);
         }
+
+        await _audit.LogAsync(
+            actorUserId, AuditActions.DocumentDeleted, AuditEntityTypes.Document, id, document.Title,
+            cancellationToken);
 
         return Result.Success();
     }

@@ -12,10 +12,11 @@ public interface ICategoryService
 
     Task<CategoryDetailDto?> GetCategoryAsync(Guid id, CancellationToken cancellationToken = default);
 
-    Task<Result<Guid>> CreateAsync(string name, string? description, CancellationToken cancellationToken = default);
+    Task<Result<Guid>> CreateAsync(
+        string name, string? description, Guid actorUserId, CancellationToken cancellationToken = default);
 
     Task<Result> UpdateAsync(
-        Guid id, string name, string? description, CancellationToken cancellationToken = default);
+        Guid id, string name, string? description, Guid actorUserId, CancellationToken cancellationToken = default);
 
-    Task<Result> DeleteAsync(Guid id, CancellationToken cancellationToken = default);
+    Task<Result> DeleteAsync(Guid id, Guid actorUserId, CancellationToken cancellationToken = default);
 }

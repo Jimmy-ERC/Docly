@@ -1,5 +1,7 @@
+using Docly.Application.Audit;
 using Docly.Application.Categories;
 using Docly.Application.Common;
+using Docly.Domain.Audit;
 using Docly.Domain.Categories;
 using Docly.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
@@ -9,10 +11,12 @@ namespace Docly.Infrastructure.Categories;
 public class CategoryService : ICategoryService
 {
     private readonly DoclyDbContext _db;
+    private readonly IAuditService _audit;
 
-    public CategoryService(DoclyDbContext db)
+    public CategoryService(DoclyDbContext db, IAuditService audit)
     {
         _db = db;
+        _audit = audit;
     }
 
     public async Task<IReadOnlyList<CategoryListItemDto>> GetCategoriesAsync(CancellationToken cancellationToken = default)
@@ -34,7 +38,7 @@ public class CategoryService : ICategoryService
     }
 
     public async Task<Result<Guid>> CreateAsync(
-        string name, string? description, CancellationToken cancellationToken = default)
+        string name, string? description, Guid actorUserId, CancellationToken cancellationToken = default)
     {
         name = name.Trim();
         if (name.Length == 0)
@@ -58,11 +62,15 @@ public class CategoryService : ICategoryService
         _db.Categories.Add(category);
         await _db.SaveChangesAsync(cancellationToken);
 
+        await _audit.LogAsync(
+            actorUserId, AuditActions.CategoryCreated, AuditEntityTypes.Category, category.Id, name,
+            cancellationToken);
+
         return Result<Guid>.Success(category.Id);
     }
 
     public async Task<Result> UpdateAsync(
-        Guid id, string name, string? description, CancellationToken cancellationToken = default)
+        Guid id, string name, string? description, Guid actorUserId, CancellationToken cancellationToken = default)
     {
         var category = await _db.Categories.FirstOrDefaultAsync(c => c.Id == id, cancellationToken);
         if (category is null)
@@ -85,10 +93,14 @@ public class CategoryService : ICategoryService
         category.Description = NormalizeDescription(description);
 
         await _db.SaveChangesAsync(cancellationToken);
+
+        await _audit.LogAsync(
+            actorUserId, AuditActions.CategoryUpdated, AuditEntityTypes.Category, id, name, cancellationToken);
+
         return Result.Success();
     }
 
-    public async Task<Result> DeleteAsync(Guid id, CancellationToken cancellationToken = default)
+    public async Task<Result> DeleteAsync(Guid id, Guid actorUserId, CancellationToken cancellationToken = default)
     {
         var category = await _db.Categories.FirstOrDefaultAsync(c => c.Id == id, cancellationToken);
         if (category is null)
@@ -103,6 +115,10 @@ public class CategoryService : ICategoryService
 
         _db.Categories.Remove(category);
         await _db.SaveChangesAsync(cancellationToken);
+
+        await _audit.LogAsync(
+            actorUserId, AuditActions.CategoryDeleted, AuditEntityTypes.Category, id, category.Name,
+            cancellationToken);
 
         return Result.Success();
     }

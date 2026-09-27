@@ -1,0 +1,69 @@
+@using Docly.Application.Search
+@model Docly.Web.ViewModels.Search.SearchViewModel
+@{
+    ViewData["Title"] = "Búsqueda semántica";
+}
+
+<h1 class="h3 mb-1">Búsqueda semántica</h1>
+<p class="text-muted">Encuentra fragmentos por su significado, aunque no compartan las mismas palabras que tu pregunta.</p>
+
+<form method="get" class="row g-2 mb-4">
+    <div class="col-md-6">
+        <input type="search" name="q" value="@Model.Query" class="form-control" autofocus
+               minlength="@ISemanticSearchService.MinQueryLength" maxlength="@ISemanticSearchService.MaxQueryLength"
+               placeholder="Ej.: ¿cuál es el proceso para solicitar vacaciones?" />
+    </div>
+    <div class="col-md-3">
+        <select name="categoryId" class="form-select">
+            <option value="">Todas las categorías</option>
+            @foreach (var category in Model.Categories)
+            {
+                <option value="@category.Id" selected="@(category.Id == Model.CategoryId)">@category.Name</option>
+            }
+        </select>
+    </div>
+    <div class="col-auto">
+        <button type="submit" class="btn btn-primary">Buscar</button>
+        @if (Model.Result is not null)
+        {
+            <a asp-action="Index" class="btn btn-link">Limpiar</a>
+        }
+    </div>
+</form>
+
+@if (Model.Result is { } result)
+{
+    if (result.Hits.Count == 0)
+    {
+        <div class="alert alert-info">
+            No se encontraron fragmentos con una similitud de al menos @result.SimilarityThreshold.ToString("P0")
+            para «@result.Query». Prueba con otras palabras o pide a un administrador que ajuste el umbral de similitud en Configuración.
+        </div>
+    }
+    else
+    {
+        <p class="text-muted small">
+            @result.Hits.Count @(result.Hits.Count == 1 ? "resultado" : "resultados")
+            (máximo @result.TopK, similitud mínima @result.SimilarityThreshold.ToString("P0")).
+        </p>
+
+        foreach (var hit in result.Hits)
+        {
+            <div class="card mb-3">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start gap-3">
+                        <div>
+                            <h2 class="h6 mb-1">@hit.DocumentTitle</h2>
+                            <span class="badge bg-secondary">@hit.CategoryName</span>
+                            <span class="text-muted small ms-1">Fragmento @(hit.ChunkIndex + 1)</span>
+                        </div>
+                        <span class="badge bg-success fs-6" title="Similitud coseno">@hit.Similarity.ToString("P0")</span>
+                    </div>
+                    <p class="mt-2 mb-2 text-break" style="white-space: pre-line;">@hit.Content</p>
+                    <a asp-controller="Documents" asp-action="Download" asp-route-id="@hit.DocumentId"
+                       class="btn btn-sm btn-outline-primary">Descargar documento</a>
+                </div>
+            </div>
+        }
+    }
+}

@@ -1,5 +1,6 @@
 ﻿using Docly.Domain.Authorization;
 using Docly.Domain.Categories;
+using Docly.Domain.Chat;
 using Docly.Domain.Documents;
 using Docly.Domain.Settings;
 using Docly.Infrastructure.Identity;
@@ -24,6 +25,8 @@ public class DoclyDbContext : IdentityDbContext<ApplicationUser, ApplicationRole
     public DbSet<DocumentFile> DocumentFiles => Set<DocumentFile>();
     public DbSet<DocumentProcessingJob> DocumentProcessingJobs => Set<DocumentProcessingJob>();
     public DbSet<KnowledgeChunk> KnowledgeChunks => Set<KnowledgeChunk>();
+    public DbSet<ChatSession> ChatSessions => Set<ChatSession>();
+    public DbSet<ChatMessage> ChatMessages => Set<ChatMessage>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {

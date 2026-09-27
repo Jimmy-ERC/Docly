@@ -94,6 +94,59 @@ namespace Docly.Infrastructure.Persistence.Migrations
                     b.ToTable("Categories", "docly");
                 });
 
+            modelBuilder.Entity("Docly.Domain.Chat.ChatMessage", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("CreatedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("Role")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("SessionId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SessionId", "CreatedAtUtc");
+
+                    b.ToTable("ChatMessages", "docly");
+                });
+
+            modelBuilder.Entity("Docly.Domain.Chat.ChatSession", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<DateTime>("UpdatedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId", "UpdatedAtUtc");
+
+                    b.ToTable("ChatSessions", "docly");
+                });
+
             modelBuilder.Entity("Docly.Domain.Documents.Document", b =>
                 {
                     b.Property<Guid>("Id")
@@ -510,6 +563,15 @@ namespace Docly.Infrastructure.Persistence.Migrations
                         .IsRequired();
 
                     b.Navigation("Permission");
+                });
+
+            modelBuilder.Entity("Docly.Domain.Chat.ChatMessage", b =>
+                {
+                    b.HasOne("Docly.Domain.Chat.ChatSession", null)
+                        .WithMany()
+                        .HasForeignKey("SessionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Docly.Domain.Documents.Document", b =>

@@ -50,6 +50,12 @@
                                 <a class="nav-link text-dark" asp-controller="Search" asp-action="Index">Búsqueda</a>
                             </li>
                         }
+                        @if (User.HasPermission(PermissionCodes.ChatUse))
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-controller="Chat" asp-action="Index">Chat</a>
+                            </li>
+                        }
                         @if (User.HasPermission(PermissionCodes.CategoriesManage))
                         {
                             <li class="nav-item">

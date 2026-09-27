@@ -3,6 +3,7 @@ using Docly.Domain.Authorization;
 using Docly.Domain.Categories;
 using Docly.Domain.Chat;
 using Docly.Domain.Documents;
+using Docly.Domain.Notifications;
 using Docly.Domain.Settings;
 using Docly.Infrastructure.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
@@ -30,6 +31,7 @@ public class DoclyDbContext : IdentityDbContext<ApplicationUser, ApplicationRole
     public DbSet<ChatMessage> ChatMessages => Set<ChatMessage>();
     public DbSet<MessageSource> MessageSources => Set<MessageSource>();
     public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
+    public DbSet<Notification> Notifications => Set<Notification>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {

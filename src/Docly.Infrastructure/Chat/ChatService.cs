@@ -49,6 +49,16 @@ public class ChatService : IChatService
     public Task<ChatSessionDto> StartNewSessionAsync(Guid userId, CancellationToken cancellationToken = default) =>
         CreateSessionAsync(userId, cancellationToken);
 
+    public async Task<IReadOnlyList<ChatSessionDto>> GetSessionsAsync(
+        Guid userId, CancellationToken cancellationToken = default)
+    {
+        return await _db.ChatSessions.AsNoTracking()
+            .Where(s => s.UserId == userId)
+            .OrderByDescending(s => s.UpdatedAtUtc)
+            .Select(s => new ChatSessionDto(s.Id, s.Title, s.UpdatedAtUtc))
+            .ToListAsync(cancellationToken);
+    }
+
     public async Task<ChatSessionDto?> GetSessionAsync(
         Guid sessionId, Guid userId, CancellationToken cancellationToken = default)
     {
@@ -69,11 +79,19 @@ public class ChatService : IChatService
             return null;
         }
 
-        return await _db.ChatMessages.AsNoTracking()
+        var messages = await _db.ChatMessages.AsNoTracking()
             .Where(m => m.SessionId == sessionId)
             .OrderBy(m => m.CreatedAtUtc)
-            .Select(m => new ChatMessageDto(m.Id, m.Role == ChatMessageRole.User, m.Content, m.CreatedAtUtc))
             .ToListAsync(cancellationToken);
+
+        var messageIds = messages.Select(m => m.Id).ToList();
+        var sources = await _db.MessageSources.AsNoTracking()
+            .Where(s => messageIds.Contains(s.MessageId))
+            .OrderBy(s => s.Order)
+            .ToListAsync(cancellationToken);
+        var sourcesByMessage = sources.ToLookup(s => s.MessageId);
+
+        return messages.Select(m => ToDto(m, sourcesByMessage[m.Id])).ToList();
     }
 
     public async Task<Result<ChatMessageDto>> AskAsync(
@@ -136,10 +154,43 @@ public class ChatService : IChatService
             Id = Guid.NewGuid(), SessionId = sessionId, Role = ChatMessageRole.Assistant, Content = answer, CreatedAtUtc = answeredAt,
         };
         _db.ChatMessages.Add(assistantMessage);
+
+        var sources = context.Value!.Sources
+            .Select((source, index) => new MessageSource
+            {
+                Id = Guid.NewGuid(),
+                MessageId = assistantMessage.Id,
+                Order = index + 1,
+                DocumentId = source.DocumentId,
+                DocumentTitle = source.DocumentTitle,
+                CategoryName = source.CategoryName,
+                ChunkId = source.ChunkId,
+                ChunkIndex = source.ChunkIndex,
+                Content = source.Content,
+            })
+            .ToList();
+        _db.MessageSources.AddRange(sources);
+
         session.UpdatedAtUtc = answeredAt;
         await _db.SaveChangesAsync(cancellationToken);
 
-        return Result<ChatMessageDto>.Success(new ChatMessageDto(assistantMessage.Id, false, answer, answeredAt));
+        return Result<ChatMessageDto>.Success(
+            new ChatMessageDto(assistantMessage.Id, false, answer, answeredAt, sources.Select(ToSourceDto).ToList()));
+    }
+
+    public async Task<Result> DeleteSessionAsync(Guid sessionId, Guid userId, CancellationToken cancellationToken = default)
+    {
+        var session = await _db.ChatSessions
+            .FirstOrDefaultAsync(s => s.Id == sessionId && s.UserId == userId, cancellationToken);
+        if (session is null)
+        {
+            return Result.Failure("La conversación no existe.");
+        }
+
+        _db.ChatSessions.Remove(session);
+        await _db.SaveChangesAsync(cancellationToken);
+
+        return Result.Success();
     }
 
     private async Task<ChatSessionDto> CreateSessionAsync(Guid userId, CancellationToken cancellationToken)
@@ -158,6 +209,14 @@ public class ChatService : IChatService
 
     private static string BuildTitle(string question) =>
         question.Length <= MaxTitleLength ? question : question[..MaxTitleLength] + "…";
+
+    private static ChatMessageDto ToDto(ChatMessage message, IEnumerable<MessageSource> sources) =>
+        new(message.Id, message.Role == ChatMessageRole.User, message.Content, message.CreatedAtUtc,
+            sources.Select(ToSourceDto).ToList());
+
+    private static MessageSourceDto ToSourceDto(MessageSource source) =>
+        new(source.Id, source.Order, source.DocumentId, source.DocumentTitle, source.CategoryName,
+            source.ChunkIndex, source.Content);
 
     /// <summary>The question as sent to Gemini, with the RAG context inlined. Kept out of the persisted
     /// <see cref="ChatMessage.Content"/> so history/UI show only what the user actually typed.</summary>

@@ -4,7 +4,15 @@ namespace Docly.Application.Chat;
 
 public sealed record ChatSessionDto(Guid Id, string Title, DateTime UpdatedAtUtc);
 
-public sealed record ChatMessageDto(Guid Id, bool IsUser, string Content, DateTime CreatedAtUtc);
+/// <summary>One knowledge chunk cited for a <see cref="ChatMessageDto"/>, in the order it was numbered
+/// as "[Fuente N]" in the prompt.</summary>
+public sealed record MessageSourceDto(
+    Guid Id, int Order, Guid DocumentId, string DocumentTitle, string CategoryName, int ChunkIndex, string Content);
+
+/// <summary><see cref="Sources"/> is empty for user messages; for assistant messages it lists the chunks
+/// the answer cited, if any were found.</summary>
+public sealed record ChatMessageDto(
+    Guid Id, bool IsUser, string Content, DateTime CreatedAtUtc, IReadOnlyList<MessageSourceDto> Sources);
 
 /// <summary>
 /// Drives a conversation: persists <see cref="Docly.Domain.Chat.ChatMessage"/>s, retrieves RAG context
@@ -13,11 +21,14 @@ public sealed record ChatMessageDto(Guid Id, bool IsUser, string Content, DateTi
 /// </summary>
 public interface IChatService
 {
-    /// <summary>The caller's most recently updated session, creating one if they have none yet. Doubles
-    /// as "the active session" until feature/historial-conversaciones adds a way to pick one explicitly.</summary>
+    /// <summary>The caller's most recently updated session, creating one if they have none yet. Used as
+    /// the active session when none was picked explicitly from <see cref="GetSessionsAsync"/>.</summary>
     Task<ChatSessionDto> GetOrCreateActiveSessionAsync(Guid userId, CancellationToken cancellationToken = default);
 
     Task<ChatSessionDto> StartNewSessionAsync(Guid userId, CancellationToken cancellationToken = default);
+
+    /// <summary>The caller's sessions, most recently updated first, for the conversation history list.</summary>
+    Task<IReadOnlyList<ChatSessionDto>> GetSessionsAsync(Guid userId, CancellationToken cancellationToken = default);
 
     /// <summary>Null if the session doesn't exist or doesn't belong to <paramref name="userId"/>.</summary>
     Task<ChatSessionDto?> GetSessionAsync(Guid sessionId, Guid userId, CancellationToken cancellationToken = default);
@@ -28,4 +39,8 @@ public interface IChatService
 
     Task<Result<ChatMessageDto>> AskAsync(
         Guid sessionId, Guid userId, string question, Guid? categoryId, CancellationToken cancellationToken = default);
+
+    /// <summary>Deletes a session and its messages. Fails if it doesn't exist or doesn't belong to
+    /// <paramref name="userId"/>.</summary>
+    Task<Result> DeleteSessionAsync(Guid sessionId, Guid userId, CancellationToken cancellationToken = default);
 }

@@ -43,10 +43,26 @@
             {
                 foreach (var message in Model.Messages)
                 {
+                    var sourcesId = $"sources-{message.Id}";
                     <div class="d-flex mb-3 @(message.IsUser ? "justify-content-end" : "justify-content-start")">
                         <div class="p-3 rounded @(message.IsUser ? "bg-primary text-white" : "bg-light border")" style="max-width: 75%;">
                             <div class="small fw-bold mb-1">@(message.IsUser ? "Tú" : "Asistente")</div>
                             <div class="text-break" style="white-space: pre-line;">@message.Content</div>
+                            @if (message.Sources.Count > 0)
+                            {
+                                <button type="button" class="btn btn-link btn-sm p-0 mt-2" data-bs-toggle="collapse" data-bs-target="#@sourcesId">
+                                    Fuentes (@message.Sources.Count)
+                                </button>
+                                <div class="collapse mt-2" id="@sourcesId">
+                                    @foreach (var source in message.Sources)
+                                    {
+                                        <div class="small border-start border-2 ps-2 mb-2">
+                                            <div class="fw-bold">[@source.Order] @source.DocumentTitle <span class="text-muted fw-normal">(@source.CategoryName, fragmento @(source.ChunkIndex + 1))</span></div>
+                                            <div class="text-muted text-break" style="white-space: pre-line;">@source.Content</div>
+                                        </div>
+                                    }
+                                </div>
+                            }
                         </div>
                     </div>
                 }

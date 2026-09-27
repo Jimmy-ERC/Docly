@@ -147,6 +147,48 @@ namespace Docly.Infrastructure.Persistence.Migrations
                     b.ToTable("ChatSessions", "docly");
                 });
 
+            modelBuilder.Entity("Docly.Domain.Chat.MessageSource", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("CategoryName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<Guid>("ChunkId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("ChunkIndex")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<Guid>("DocumentId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("DocumentTitle")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<Guid>("MessageId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("Order")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("MessageId", "Order");
+
+                    b.ToTable("ChatMessageSources", "docly");
+                });
+
             modelBuilder.Entity("Docly.Domain.Documents.Document", b =>
                 {
                     b.Property<Guid>("Id")
@@ -570,6 +612,15 @@ namespace Docly.Infrastructure.Persistence.Migrations
                     b.HasOne("Docly.Domain.Chat.ChatSession", null)
                         .WithMany()
                         .HasForeignKey("SessionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Docly.Domain.Chat.MessageSource", b =>
+                {
+                    b.HasOne("Docly.Domain.Chat.ChatMessage", null)
+                        .WithMany()
+                        .HasForeignKey("MessageId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });

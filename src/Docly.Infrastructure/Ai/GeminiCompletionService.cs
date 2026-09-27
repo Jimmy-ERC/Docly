@@ -37,7 +37,7 @@ public class GeminiCompletionService : ICompletionService
         }
 
         var payload = new GenerateContentRequest(
-            new SystemInstruction(new Content([new Part(systemInstruction)])),
+            new Content([new Part(systemInstruction)]),
             history.Select(turn => new TurnContent(turn.IsUser ? "user" : "model", [new Part(turn.Content)])).ToList());
 
         using var response = await SendWithRetryAsync(payload, cancellationToken);
@@ -111,11 +111,9 @@ public class GeminiCompletionService : ICompletionService
 
     private sealed record Content(IReadOnlyList<Part> Parts);
 
-    private sealed record SystemInstruction(Content Content);
-
     private sealed record TurnContent(string Role, IReadOnlyList<Part> Parts);
 
-    private sealed record GenerateContentRequest(SystemInstruction SystemInstruction, IReadOnlyList<TurnContent> Contents);
+    private sealed record GenerateContentRequest(Content SystemInstruction, IReadOnlyList<TurnContent> Contents);
 
     private sealed record Candidate(TurnContent? Content);
 

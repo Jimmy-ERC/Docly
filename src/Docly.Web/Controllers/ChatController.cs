@@ -31,11 +31,13 @@ public class ChatController : Controller
             ?? await _chat.GetOrCreateActiveSessionAsync(userId, cancellationToken);
 
         var messages = await _chat.GetMessagesAsync(session.Id, userId, cancellationToken) ?? [];
+        var sessions = await _chat.GetSessionsAsync(userId, cancellationToken);
 
         return View(new ChatIndexViewModel
         {
             Session = session,
             Messages = messages,
+            Sessions = sessions,
             CategoryId = categoryId,
             Categories = (await _categoryService.GetCategoriesAsync())
                 .Select(c => new CategoryOption(c.Id, c.Name))
@@ -66,5 +68,19 @@ public class ChatController : Controller
     {
         var session = await _chat.StartNewSessionAsync(User.GetUserId(), HttpContext.RequestAborted);
         return RedirectToAction(nameof(Index), new { sessionId = session.Id });
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> DeleteSession(Guid sessionId)
+    {
+        var result = await _chat.DeleteSessionAsync(sessionId, User.GetUserId(), HttpContext.RequestAborted);
+
+        if (!result.Succeeded)
+        {
+            TempData["Error"] = string.Join(" ", result.Errors);
+        }
+
+        return RedirectToAction(nameof(Index));
     }
 }

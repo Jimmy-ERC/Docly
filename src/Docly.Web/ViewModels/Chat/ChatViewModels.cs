@@ -7,6 +7,7 @@ public class ChatIndexViewModel
 {
     public required ChatSessionDto Session { get; set; }
     public required IReadOnlyList<ChatMessageDto> Messages { get; set; }
+    public IReadOnlyList<ChatSessionDto> Sessions { get; set; } = [];
     public Guid? CategoryId { get; set; }
     public IReadOnlyList<CategoryOption> Categories { get; set; } = [];
 }

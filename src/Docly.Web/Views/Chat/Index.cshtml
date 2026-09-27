@@ -3,49 +3,74 @@
     ViewData["Title"] = "Chat";
 }
 
-<div class="d-flex justify-content-between align-items-center mb-1">
-    <h1 class="h3 mb-0">@Model.Session.Title</h1>
-    <form asp-action="NewSession" method="post">
-        <button type="submit" class="btn btn-outline-secondary btn-sm">Nueva conversación</button>
-    </form>
-</div>
-<p class="text-muted">Pregunta sobre los documentos de la base de conocimiento; el asistente responde citando solo lo que encuentra en ellos.</p>
-
-<div class="mb-3" style="max-height: 60vh; overflow-y: auto;">
-    @if (Model.Messages.Count == 0)
-    {
-        <div class="alert alert-info">Todavía no has hecho ninguna pregunta en esta conversación.</div>
-    }
-    else
-    {
-        foreach (var message in Model.Messages)
-        {
-            <div class="d-flex mb-3 @(message.IsUser ? "justify-content-end" : "justify-content-start")">
-                <div class="p-3 rounded @(message.IsUser ? "bg-primary text-white" : "bg-light border")" style="max-width: 75%;">
-                    <div class="small fw-bold mb-1">@(message.IsUser ? "Tú" : "Asistente")</div>
-                    <div class="text-break" style="white-space: pre-line;">@message.Content</div>
-                </div>
-            </div>
-        }
-    }
-</div>
-
-<form asp-action="Ask" method="post" class="row g-2">
-    <input type="hidden" name="sessionId" value="@Model.Session.Id" />
-    <div class="col-md-3">
-        <select name="categoryId" class="form-select">
-            <option value="">Todas las categorías</option>
-            @foreach (var category in Model.Categories)
+<div class="row">
+    <div class="col-md-3 mb-3">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+            <h2 class="h6 mb-0">Conversaciones</h2>
+            <form asp-action="NewSession" method="post">
+                <button type="submit" class="btn btn-outline-secondary btn-sm">Nueva</button>
+            </form>
+        </div>
+        <div class="list-group" style="max-height: 70vh; overflow-y: auto;">
+            @foreach (var session in Model.Sessions)
             {
-                <option value="@category.Id" selected="@(category.Id == Model.CategoryId)">@category.Name</option>
+                <div class="list-group-item d-flex align-items-center justify-content-between p-0 @(session.Id == Model.Session.Id ? "active" : "")">
+                    <a asp-action="Index" asp-route-sessionId="@session.Id" asp-route-categoryId="@Model.CategoryId"
+                       class="flex-grow-1 text-truncate p-2 @(session.Id == Model.Session.Id ? "text-white" : "text-dark")"
+                       style="text-decoration: none;" title="@session.Title">
+                        @session.Title
+                    </a>
+                    <form asp-action="DeleteSession" method="post" class="p-1"
+                          onsubmit="return confirm('¿Eliminar esta conversación?');">
+                        <input type="hidden" name="sessionId" value="@session.Id" />
+                        <button type="submit" class="btn btn-sm @(session.Id == Model.Session.Id ? "btn-outline-light" : "btn-outline-danger")">&times;</button>
+                    </form>
+                </div>
             }
-        </select>
+        </div>
     </div>
-    <div class="col-md-7">
-        <input type="text" name="question" class="form-control" autofocus required
-               placeholder="Escribe tu pregunta..." />
+
+    <div class="col-md-9">
+        <h1 class="h3 mb-1">@Model.Session.Title</h1>
+        <p class="text-muted">Pregunta sobre los documentos de la base de conocimiento; el asistente responde citando solo lo que encuentra en ellos.</p>
+
+        <div class="mb-3" style="max-height: 55vh; overflow-y: auto;">
+            @if (Model.Messages.Count == 0)
+            {
+                <div class="alert alert-info">Todavía no has hecho ninguna pregunta en esta conversación.</div>
+            }
+            else
+            {
+                foreach (var message in Model.Messages)
+                {
+                    <div class="d-flex mb-3 @(message.IsUser ? "justify-content-end" : "justify-content-start")">
+                        <div class="p-3 rounded @(message.IsUser ? "bg-primary text-white" : "bg-light border")" style="max-width: 75%;">
+                            <div class="small fw-bold mb-1">@(message.IsUser ? "Tú" : "Asistente")</div>
+                            <div class="text-break" style="white-space: pre-line;">@message.Content</div>
+                        </div>
+                    </div>
+                }
+            }
+        </div>
+
+        <form asp-action="Ask" method="post" class="row g-2">
+            <input type="hidden" name="sessionId" value="@Model.Session.Id" />
+            <div class="col-md-3">
+                <select name="categoryId" class="form-select">
+                    <option value="">Todas las categorías</option>
+                    @foreach (var category in Model.Categories)
+                    {
+                        <option value="@category.Id" selected="@(category.Id == Model.CategoryId)">@category.Name</option>
+                    }
+                </select>
+            </div>
+            <div class="col-md-7">
+                <input type="text" name="question" class="form-control" autofocus required
+                       placeholder="Escribe tu pregunta..." />
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-primary w-100">Enviar</button>
+            </div>
+        </form>
     </div>
-    <div class="col-md-2">
-        <button type="submit" class="btn btn-primary w-100">Enviar</button>
-    </div>
-</form>
+</div>

@@ -11,10 +11,10 @@ namespace Docly.Web.Controllers;
 [HasPermission(PermissionCodes.DocumentsView)]
 public class SearchController : Controller
 {
-    private readonly ISemanticSearchService _search;
+    private readonly IHybridSearchService _search;
     private readonly ICategoryService _categoryService;
 
-    public SearchController(ISemanticSearchService search, ICategoryService categoryService)
+    public SearchController(IHybridSearchService search, ICategoryService categoryService)
     {
         _search = search;
         _categoryService = categoryService;

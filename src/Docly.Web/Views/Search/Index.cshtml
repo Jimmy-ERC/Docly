@@ -1,16 +1,19 @@
 @using Docly.Application.Search
 @model Docly.Web.ViewModels.Search.SearchViewModel
 @{
-    ViewData["Title"] = "Búsqueda semántica";
+    ViewData["Title"] = "Búsqueda";
 }
 
-<h1 class="h3 mb-1">Búsqueda semántica</h1>
-<p class="text-muted">Encuentra fragmentos por su significado, aunque no compartan las mismas palabras que tu pregunta.</p>
+<h1 class="h3 mb-1">Búsqueda</h1>
+<p class="text-muted">
+    Combina similitud semántica y coincidencia de palabras clave para encontrar los fragmentos más relevantes,
+    aunque no compartan exactamente las mismas palabras que tu pregunta.
+</p>
 
 <form method="get" class="row g-2 mb-4">
     <div class="col-md-6">
         <input type="search" name="q" value="@Model.Query" class="form-control" autofocus
-               minlength="@ISemanticSearchService.MinQueryLength" maxlength="@ISemanticSearchService.MaxQueryLength"
+               minlength="@IHybridSearchService.MinQueryLength" maxlength="@IHybridSearchService.MaxQueryLength"
                placeholder="Ej.: ¿cuál es el proceso para solicitar vacaciones?" />
     </div>
     <div class="col-md-3">
@@ -36,15 +39,15 @@
     if (result.Hits.Count == 0)
     {
         <div class="alert alert-info">
-            No se encontraron fragmentos con una similitud de al menos @result.SimilarityThreshold.ToString("P0")
-            para «@result.Query». Prueba con otras palabras o pide a un administrador que ajuste el umbral de similitud en Configuración.
+            No se encontraron fragmentos relevantes para «@result.Query». Prueba con otras palabras o pide a un
+            administrador que ajuste el umbral de similitud en Configuración.
         </div>
     }
     else
     {
         <p class="text-muted small">
             @result.Hits.Count @(result.Hits.Count == 1 ? "resultado" : "resultados")
-            (máximo @result.TopK, similitud mínima @result.SimilarityThreshold.ToString("P0")).
+            (máximo @result.TopK, similitud semántica mínima @result.SimilarityThreshold.ToString("P0")).
         </p>
 
         foreach (var hit in result.Hits)
@@ -57,7 +60,20 @@
                             <span class="badge bg-secondary">@hit.CategoryName</span>
                             <span class="text-muted small ms-1">Fragmento @(hit.ChunkIndex + 1)</span>
                         </div>
-                        <span class="badge bg-success fs-6" title="Similitud coseno">@hit.Similarity.ToString("P0")</span>
+                        <div class="text-end">
+                            @if (hit.MatchedBySemanticSearch)
+                            {
+                                <span class="badge bg-primary" title="Encontrado por similitud semántica">Semántica</span>
+                            }
+                            @if (hit.MatchedByKeywordSearch)
+                            {
+                                <span class="badge bg-success" title="Encontrado por coincidencia de palabras clave">Palabra clave</span>
+                            }
+                            @if (hit.Similarity is { } similarity)
+                            {
+                                <div class="fs-6 mt-1" title="Similitud coseno">@similarity.ToString("P0")</div>
+                            }
+                        </div>
                     </div>
                     <p class="mt-2 mb-2 text-break" style="white-space: pre-line;">@hit.Content</p>
                     <a asp-controller="Documents" asp-action="Download" asp-route-id="@hit.DocumentId"

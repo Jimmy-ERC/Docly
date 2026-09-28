@@ -37,6 +37,11 @@
         <input asp-for="File" type="file" class="form-control" accept=".pdf,.docx,.txt,.md" />
         <span asp-validation-for="File" class="text-danger"></span>
         <div class="form-text">PDF, Word (.docx), texto plano o Markdown. Máximo 20 MB.</div>
+        <div class="alert alert-info mt-2 mb-0 py-2" role="note">
+            <strong>Recomendación:</strong> para que la IA responda mejor, prefiere archivos de solo texto
+            (.txt, .md o PDF/Word con texto seleccionable). Los archivos con muchas imágenes, tablas
+            complejas o PDF escaneados pueden perder información al extraer el contenido.
+        </div>
     </div>
 
     <button type="submit" class="btn btn-primary">Subir</button>

@@ -10,7 +10,7 @@
     aunque no compartan exactamente las mismas palabras que tu pregunta.
 </p>
 
-<form method="get" class="row g-2 mb-4">
+<form method="get" class="row g-2 mb-4 filter-bar">
     <div class="col-md-6">
         <input type="search" name="q" value="@Model.Query" class="form-control" autofocus
                minlength="@IHybridSearchService.MinQueryLength" maxlength="@IHybridSearchService.MaxQueryLength"
@@ -52,30 +52,30 @@
 
         foreach (var hit in result.Hits)
         {
-            <div class="card mb-3">
+            <div class="card hit-card mb-3">
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-start gap-3">
                         <div>
                             <h2 class="h6 mb-1">@hit.DocumentTitle</h2>
-                            <span class="badge bg-secondary">@hit.CategoryName</span>
+                            <span class="badge badge-soft badge-soft-muted">@hit.CategoryName</span>
                             <span class="text-muted small ms-1">Fragmento @(hit.ChunkIndex + 1)</span>
                         </div>
                         <div class="text-end">
                             @if (hit.MatchedBySemanticSearch)
                             {
-                                <span class="badge bg-primary" title="Encontrado por similitud semántica">Semántica</span>
+                                <span class="badge badge-soft badge-soft-info" title="Encontrado por similitud semántica">Semántica</span>
                             }
                             @if (hit.MatchedByKeywordSearch)
                             {
-                                <span class="badge bg-success" title="Encontrado por coincidencia de palabras clave">Palabra clave</span>
+                                <span class="badge badge-soft badge-soft-success" title="Encontrado por coincidencia de palabras clave">Palabra clave</span>
                             }
                             @if (hit.Similarity is { } similarity)
                             {
-                                <div class="fs-6 mt-1" title="Similitud coseno">@similarity.ToString("P0")</div>
+                                <div class="mt-2" title="Similitud coseno"><span class="hit-score">@similarity.ToString("P0")</span></div>
                             }
                         </div>
                     </div>
-                    <p class="mt-2 mb-2 text-break" style="white-space: pre-line;">@hit.Content</p>
+                    <p class="hit-content mt-3 mb-3 text-break" style="white-space: pre-line;">@hit.Content</p>
                     <a asp-controller="Documents" asp-action="Download" asp-route-id="@hit.DocumentId"
                        class="btn btn-sm btn-outline-primary">Descargar documento</a>
                 </div>

@@ -5,12 +5,12 @@
 
     var (badgeClass, badgeText) = Model.Processing?.Status switch
     {
-        DocumentProcessingStatus.Completed => ("bg-success", "Procesado"),
-        DocumentProcessingStatus.Failed => ("bg-danger", "Error al procesar"),
-        DocumentProcessingStatus.ExtractingText => ("bg-info text-dark", "Extrayendo texto…"),
-        DocumentProcessingStatus.Chunking => ("bg-info text-dark", "Fragmentando…"),
-        DocumentProcessingStatus.Embedding => ("bg-info text-dark", "Generando embeddings…"),
-        _ => ("bg-secondary", "Pendiente"),
+        DocumentProcessingStatus.Completed => ("badge-soft-success with-dot", "Procesado"),
+        DocumentProcessingStatus.Failed => ("badge-soft-danger with-dot", "Error al procesar"),
+        DocumentProcessingStatus.ExtractingText => ("badge-soft-info with-dot is-working", "Extrayendo texto…"),
+        DocumentProcessingStatus.Chunking => ("badge-soft-info with-dot is-working", "Fragmentando…"),
+        DocumentProcessingStatus.Embedding => ("badge-soft-info with-dot is-working", "Generando embeddings…"),
+        _ => ("badge-soft-muted with-dot", "Pendiente"),
     };
 }
 
@@ -69,7 +69,7 @@
 
 <h2 class="h5">Procesamiento (base de conocimiento)</h2>
 <p>
-    <span class="badge @badgeClass">@badgeText</span>
+    <span class="badge badge-soft @badgeClass">@badgeText</span>
     @if (Model.Processing is { Status: DocumentProcessingStatus.Completed })
     {
         <span class="text-muted">— @Model.Processing.ChunkCount fragmento(s) con embedding, @Model.Processing.CompletedAtUtc?.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</span>

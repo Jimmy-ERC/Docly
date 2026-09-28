@@ -1,3 +1,8 @@
+@{
+    var currentController = ViewContext.RouteData.Values["controller"]?.ToString();
+    string NavClass(string controller) =>
+        string.Equals(currentController, controller, StringComparison.OrdinalIgnoreCase) ? "active" : "";
+}
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -11,96 +16,96 @@
 </head>
 <body>
     <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
+        <nav class="navbar navbar-expand-lg navbar-dark app-navbar mb-4">
             <div class="container-fluid">
                 <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">Docly</a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
                         aria-expanded="false" aria-label="Alternar navegación">
                     <span class="navbar-toggler-icon"></span>
                 </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
+                <div class="navbar-collapse collapse justify-content-between">
+                    <ul class="navbar-nav flex-grow-1 gap-lg-1">
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Inicio</a>
+                            <a class="nav-link @NavClass("Home")" asp-area="" asp-controller="Home" asp-action="Index">Inicio</a>
                         </li>
                         @if (User.HasPermission(PermissionCodes.UsersView))
                         {
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-controller="Users" asp-action="Index">Usuarios</a>
+                                <a class="nav-link @NavClass("Users")" asp-controller="Users" asp-action="Index">Usuarios</a>
                             </li>
                         }
                         @if (User.HasPermission(PermissionCodes.RolesManage))
                         {
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-controller="Roles" asp-action="Index">Roles</a>
+                                <a class="nav-link @NavClass("Roles")" asp-controller="Roles" asp-action="Index">Roles</a>
                             </li>
                         }
                         @if (User.HasPermission(PermissionCodes.DocumentsView))
                         {
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-controller="Documents" asp-action="Index">Documentos</a>
+                                <a class="nav-link @NavClass("Documents")" asp-controller="Documents" asp-action="Index">Documentos</a>
                             </li>
                         }
                         @if (User.HasPermission(PermissionCodes.DocumentsView))
                         {
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-controller="KnowledgeBase" asp-action="Index">Base de conocimiento</a>
+                                <a class="nav-link @NavClass("KnowledgeBase")" asp-controller="KnowledgeBase" asp-action="Index">Base de conocimiento</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-controller="Search" asp-action="Index">Búsqueda</a>
+                                <a class="nav-link @NavClass("Search")" asp-controller="Search" asp-action="Index">Búsqueda</a>
                             </li>
                         }
                         @if (User.HasPermission(PermissionCodes.ChatUse))
                         {
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-controller="Chat" asp-action="Index">Chat</a>
+                                <a class="nav-link @NavClass("Chat")" asp-controller="Chat" asp-action="Index">Chat</a>
                             </li>
                         }
                         @if (User.HasPermission(PermissionCodes.CategoriesManage))
                         {
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-controller="Categories" asp-action="Index">Categorías</a>
+                                <a class="nav-link @NavClass("Categories")" asp-controller="Categories" asp-action="Index">Categorías</a>
                             </li>
                         }
                         @if (User.HasPermission(PermissionCodes.SettingsManage))
                         {
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-controller="Settings" asp-action="Index">Configuración</a>
+                                <a class="nav-link @NavClass("Settings")" asp-controller="Settings" asp-action="Index">Configuración</a>
                             </li>
                         }
                         @if (User.HasPermission(PermissionCodes.AuditView))
                         {
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-controller="Audit" asp-action="Index">Auditoría</a>
+                                <a class="nav-link @NavClass("Audit")" asp-controller="Audit" asp-action="Index">Auditoría</a>
                             </li>
                         }
                         @if (User.HasPermission(PermissionCodes.StatsView))
                         {
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-controller="Stats" asp-action="Index">Estadísticas</a>
+                                <a class="nav-link @NavClass("Stats")" asp-controller="Stats" asp-action="Index">Estadísticas</a>
                             </li>
                         }
                     </ul>
-                    <ul class="navbar-nav">
+                    <ul class="navbar-nav align-items-lg-center gap-lg-2">
                         @if (User.Identity?.IsAuthenticated == true)
                         {
                             <vc:notification-bell />
                             <li class="nav-item d-flex align-items-center me-2">
-                                <span class="navbar-text text-dark">@User.GetDisplayName()</span>
+                                <span class="navbar-text user-name">@User.GetDisplayName()</span>
                             </li>
                             <li class="nav-item">
                                 <form asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
-                                    <button type="submit" class="btn btn-outline-secondary btn-sm">Cerrar sesión</button>
+                                    <button type="submit" class="btn btn-outline-light btn-sm">Cerrar sesión</button>
                                 </form>
                             </li>
                         }
                         else
                         {
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-controller="Account" asp-action="Login">Iniciar sesión</a>
+                                <a class="nav-link" asp-controller="Account" asp-action="Login">Iniciar sesión</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-controller="Account" asp-action="Register">Registrarse</a>
+                                <a class="nav-link" asp-controller="Account" asp-action="Register">Registrarse</a>
                             </li>
                         }
                     </ul>
@@ -115,7 +120,7 @@
         </main>
     </div>
 
-    <footer class="border-top footer text-muted">
+    <footer class="app-footer">
         <div class="container">
             &copy; 2026 - Docly
         </div>

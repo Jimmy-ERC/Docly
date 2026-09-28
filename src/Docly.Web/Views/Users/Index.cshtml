@@ -7,7 +7,7 @@
     <h1 class="h3 mb-0">Usuarios</h1>
 </div>
 
-<form method="get" class="row g-2 mb-3">
+<form method="get" class="row g-2 mb-3 filter-bar">
     <div class="col-sm-6 col-md-4">
         <input type="search" name="search" value="@Model.Search" class="form-control" placeholder="Buscar por nombre o correo" />
     </div>
@@ -41,17 +41,17 @@
                 <td>
                     @foreach (var role in user.Roles)
                     {
-                        <span class="badge text-bg-secondary">@role</span>
+                        <span class="badge badge-soft badge-soft-muted">@role</span>
                     }
                 </td>
                 <td>
                     @if (user.IsActive)
                     {
-                        <span class="badge text-bg-success">Activo</span>
+                        <span class="badge badge-soft badge-soft-success with-dot">Activo</span>
                     }
                     else
                     {
-                        <span class="badge text-bg-danger">Desactivado</span>
+                        <span class="badge badge-soft badge-soft-danger with-dot">Desactivado</span>
                     }
                 </td>
                 <td>@user.CreatedAt.ToLocalTime().ToString("dd/MM/yyyy")</td>

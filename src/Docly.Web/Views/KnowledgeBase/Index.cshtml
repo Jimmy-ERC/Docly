@@ -20,14 +20,14 @@
         </div></div>
     </div>
     <div class="col-6 col-md-3">
-        <div class="card text-center"><div class="card-body">
+        <div class="card text-center stat-green"><div class="card-body">
             <div class="fs-3 fw-bold">@Model.Stats.EmbeddedChunkCount</div>
             <div class="text-muted small">Con embedding</div>
         </div></div>
     </div>
     <div class="col-6 col-md-3">
-        <div class="card text-center"><div class="card-body">
-            <div class="fs-3 fw-bold @(Model.Stats.ChunkCount > Model.Stats.EmbeddedChunkCount ? "text-danger" : "")">@(Model.Stats.ChunkCount - Model.Stats.EmbeddedChunkCount)</div>
+        <div class="card text-center @(Model.Stats.ChunkCount > Model.Stats.EmbeddedChunkCount ? "stat-amber" : "stat-green")"><div class="card-body">
+            <div class="fs-3 fw-bold @(Model.Stats.ChunkCount > Model.Stats.EmbeddedChunkCount ? "text-warning-emphasis" : "")">@(Model.Stats.ChunkCount - Model.Stats.EmbeddedChunkCount)</div>
             <div class="text-muted small">Sin embedding</div>
         </div></div>
     </div>
@@ -51,17 +51,17 @@
         {
             var (badgeClass, badgeText) = document.Status switch
             {
-                DocumentProcessingStatus.Completed => ("bg-success", "Indexado"),
-                DocumentProcessingStatus.Failed => ("bg-danger", "Error"),
-                DocumentProcessingStatus.ExtractingText => ("bg-info text-dark", "Extrayendo texto…"),
-                DocumentProcessingStatus.Chunking => ("bg-info text-dark", "Fragmentando…"),
-                DocumentProcessingStatus.Embedding => ("bg-info text-dark", "Generando embeddings…"),
-                _ => ("bg-secondary", "Pendiente"),
+                DocumentProcessingStatus.Completed => ("badge-soft-success with-dot", "Indexado"),
+                DocumentProcessingStatus.Failed => ("badge-soft-danger with-dot", "Error"),
+                DocumentProcessingStatus.ExtractingText => ("badge-soft-info with-dot is-working", "Extrayendo texto…"),
+                DocumentProcessingStatus.Chunking => ("badge-soft-info with-dot is-working", "Fragmentando…"),
+                DocumentProcessingStatus.Embedding => ("badge-soft-info with-dot is-working", "Generando embeddings…"),
+                _ => ("badge-soft-muted with-dot", "Pendiente"),
             };
             <tr>
                 <td><strong>@document.Title</strong></td>
                 <td>@document.CategoryName</td>
-                <td><span class="badge @badgeClass">@badgeText</span></td>
+                <td><span class="badge badge-soft @badgeClass">@badgeText</span></td>
                 <td class="text-end">@document.ChunkCount</td>
                 <td class="text-end">@document.EmbeddedChunkCount</td>
                 <td>@(document.IndexedAtUtc?.ToLocalTime().ToString("dd/MM/yyyy HH:mm") ?? "—")</td>

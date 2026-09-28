@@ -21,11 +21,11 @@
                     Estado:
                     @if (Model.IsActive)
                     {
-                        <span class="badge text-bg-success">Activo</span>
+                        <span class="badge badge-soft badge-soft-success with-dot">Activo</span>
                     }
                     else
                     {
-                        <span class="badge text-bg-danger">Desactivado</span>
+                        <span class="badge badge-soft badge-soft-danger with-dot">Desactivado</span>
                     }
                 </p>
                 <p class="mb-3">Registrado el @Model.CreatedAt.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</p>

@@ -13,11 +13,14 @@ public class SearchController : Controller
 {
     private readonly IHybridSearchService _search;
     private readonly ICategoryService _categoryService;
+    private readonly ISearchQueryLogService _searchQueryLog;
 
-    public SearchController(IHybridSearchService search, ICategoryService categoryService)
+    public SearchController(
+        IHybridSearchService search, ICategoryService categoryService, ISearchQueryLogService searchQueryLog)
     {
         _search = search;
         _categoryService = categoryService;
+        _searchQueryLog = searchQueryLog;
     }
 
     [HttpGet]
@@ -40,6 +43,9 @@ public class SearchController : Controller
             if (result.Succeeded)
             {
                 model.Result = result.Value;
+
+                await _searchQueryLog.LogAsync(
+                    User.GetUserId(), q, categoryId, result.Value!.Hits.Count, HttpContext.RequestAborted);
             }
             else
             {

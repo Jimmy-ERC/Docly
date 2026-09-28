@@ -7,7 +7,7 @@
 <h1 class="h3 mb-3">Estadísticas</h1>
 
 <div class="row g-3 mb-4">
-    <div class="col-sm-6 col-lg-4">
+    <div class="col-sm-6 col-lg-3">
         <div class="card text-center h-100">
             <div class="card-body">
                 <div class="display-6">@Model.TotalDocuments</div>
@@ -15,7 +15,15 @@
             </div>
         </div>
     </div>
-    <div class="col-sm-6 col-lg-4">
+    <div class="col-sm-6 col-lg-3">
+        <div class="card text-center h-100">
+            <div class="card-body">
+                <div class="display-6">@Model.TotalUsers</div>
+                <div class="text-muted">Usuarios (@Model.ActiveUsers activos / @Model.InactiveUsers inactivos)</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-lg-3">
         <div class="card text-center h-100">
             <div class="card-body">
                 <div class="display-6">@Model.AuditEventsLast7Days</div>
@@ -23,7 +31,7 @@
             </div>
         </div>
     </div>
-    <div class="col-sm-6 col-lg-4">
+    <div class="col-sm-6 col-lg-3">
         <div class="card text-center h-100">
             <div class="card-body">
                 <div class="display-6">@Model.NotificationsSentLast7Days</div>
@@ -33,7 +41,42 @@
     </div>
 </div>
 
-<div class="row g-3">
+<div class="row g-3 mb-4">
+    <div class="col-sm-6 col-lg-3">
+        <div class="card text-center h-100">
+            <div class="card-body">
+                <div class="display-6">@Model.TotalChatSessions</div>
+                <div class="text-muted">Sesiones de chat</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-lg-3">
+        <div class="card text-center h-100">
+            <div class="card-body">
+                <div class="display-6">@Model.TotalChatMessages</div>
+                <div class="text-muted">Mensajes de chat (@Model.AverageMessagesPerSession.ToString("0.0") prom. por sesión)</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-lg-3">
+        <div class="card text-center h-100">
+            <div class="card-body">
+                <div class="display-6">@Model.TotalKnowledgeChunks</div>
+                <div class="text-muted">Fragmentos en la base de conocimiento (@Model.AverageChunksPerDocument.ToString("0.0") prom. por documento)</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-lg-3">
+        <div class="card text-center h-100">
+            <div class="card-body">
+                <div class="display-6">@Model.SearchesLast7Days</div>
+                <div class="text-muted">Búsquedas realizadas (últimos 7 días)</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
     <div class="col-md-6">
         <div class="card h-100">
             <div class="card-header">Documentos por categoría</div>
@@ -77,6 +120,27 @@
                 @if (Model.DocumentsByStatus.Count == 0)
                 {
                     <li class="list-group-item text-center text-muted">No hay documentos aún.</li>
+                }
+            </ul>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3">
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-header">Usuarios por rol</div>
+            <ul class="list-group list-group-flush">
+                @foreach (var item in Model.UsersByRole)
+                {
+                    <li class="list-group-item d-flex justify-content-between">
+                        <span>@item.RoleName</span>
+                        <span class="badge bg-secondary rounded-pill">@item.Count</span>
+                    </li>
+                }
+                @if (Model.UsersByRole.Count == 0)
+                {
+                    <li class="list-group-item text-center text-muted">No hay usuarios con rol asignado.</li>
                 }
             </ul>
         </div>

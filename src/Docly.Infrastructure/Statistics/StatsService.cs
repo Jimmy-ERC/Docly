@@ -42,7 +42,32 @@ public class StatsService : IStatsService
         var notificationsSentLast7Days = await _db.Notifications.AsNoTracking()
             .CountAsync(n => n.CreatedAtUtc >= since, cancellationToken);
 
+        var totalUsers = await _db.Users.CountAsync(cancellationToken);
+        var activeUsers = await _db.Users.CountAsync(u => u.IsActive, cancellationToken);
+
+        var usersByRole = await (
+            from ur in _db.UserRoles.AsNoTracking()
+            join r in _db.Roles.AsNoTracking() on ur.RoleId equals r.Id
+            group ur by r.Name into g
+            orderby g.Key
+            select new RoleUserCountDto(g.Key!, g.Count())
+        ).ToListAsync(cancellationToken);
+
+        var totalChatSessions = await _db.ChatSessions.CountAsync(cancellationToken);
+        var totalChatMessages = await _db.ChatMessages.CountAsync(cancellationToken);
+        var averageMessagesPerSession = totalChatSessions > 0 ? (double)totalChatMessages / totalChatSessions : 0;
+
+        var totalKnowledgeChunks = await _db.KnowledgeChunks.CountAsync(cancellationToken);
+        var averageChunksPerDocument = totalDocuments > 0 ? (double)totalKnowledgeChunks / totalDocuments : 0;
+
+        var searchesLast7Days = await _db.SearchQueryLogs.AsNoTracking()
+            .CountAsync(s => s.CreatedAtUtc >= since, cancellationToken);
+
         return new StatsDashboardDto(
-            totalDocuments, documentsByCategory, documentsByStatus, auditEventsLast7Days, notificationsSentLast7Days);
+            totalDocuments, documentsByCategory, documentsByStatus, auditEventsLast7Days, notificationsSentLast7Days,
+            totalUsers, activeUsers, totalUsers - activeUsers, usersByRole,
+            totalChatSessions, totalChatMessages, averageMessagesPerSession,
+            totalKnowledgeChunks, averageChunksPerDocument,
+            searchesLast7Days);
     }
 }

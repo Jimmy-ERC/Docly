@@ -130,6 +130,7 @@ public static class DependencyInjection
         services.AddScoped<IDocumentProcessingService, DocumentProcessingService>();
         services.AddScoped<IDocumentService, DocumentService>();
         services.AddScoped<IHybridSearchService, HybridSearchService>();
+        services.AddScoped<ISearchQueryLogService, SearchQueryLogService>();
         services.AddScoped<IContextRetrievalService, ContextRetrievalService>();
 
         services.AddHttpClient<ICompletionService, GeminiCompletionService>((provider, client) =>

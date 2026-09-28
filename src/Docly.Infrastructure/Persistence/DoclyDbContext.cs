@@ -4,6 +4,7 @@ using Docly.Domain.Categories;
 using Docly.Domain.Chat;
 using Docly.Domain.Documents;
 using Docly.Domain.Notifications;
+using Docly.Domain.Search;
 using Docly.Domain.Settings;
 using Docly.Infrastructure.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
@@ -32,6 +33,7 @@ public class DoclyDbContext : IdentityDbContext<ApplicationUser, ApplicationRole
     public DbSet<MessageSource> MessageSources => Set<MessageSource>();
     public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
     public DbSet<Notification> Notifications => Set<Notification>();
+    public DbSet<SearchQueryLog> SearchQueryLogs => Set<SearchQueryLog>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {

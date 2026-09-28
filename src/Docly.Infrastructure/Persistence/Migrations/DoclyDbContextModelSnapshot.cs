@@ -422,6 +422,38 @@ namespace Docly.Infrastructure.Persistence.Migrations
                     b.ToTable("Notifications", "docly");
                 });
 
+            modelBuilder.Entity("Docly.Domain.Search.SearchQueryLog", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("CategoryId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Query")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<int>("ResultCount")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatedAtUtc");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("SearchQueryLogs", "docly");
+                });
+
             modelBuilder.Entity("Docly.Domain.Settings.SystemSetting", b =>
                 {
                     b.Property<Guid>("Id")

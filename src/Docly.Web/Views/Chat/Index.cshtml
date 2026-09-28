@@ -4,37 +4,37 @@
 }
 
 <div class="row">
-    <div class="col-md-3 mb-3">
+    <div class="col-md-3 mb-3"><div class="chat-sidebar">
         <div class="d-flex justify-content-between align-items-center mb-2">
             <h2 class="h6 mb-0">Conversaciones</h2>
             <form asp-action="NewSession" method="post">
                 <button type="submit" class="btn btn-outline-secondary btn-sm">Nueva</button>
             </form>
         </div>
-        <div class="list-group" style="max-height: 70vh; overflow-y: auto;">
+        <div class="list-group chat-sessions" style="max-height: 70vh; overflow-y: auto;">
             @foreach (var session in Model.Sessions)
             {
                 <div class="list-group-item d-flex align-items-center justify-content-between p-0 @(session.Id == Model.Session.Id ? "active" : "")">
                     <a asp-action="Index" asp-route-sessionId="@session.Id" asp-route-categoryId="@Model.CategoryId"
-                       class="flex-grow-1 text-truncate p-2 @(session.Id == Model.Session.Id ? "text-white" : "text-dark")"
+                       class="flex-grow-1 text-truncate p-2"
                        style="text-decoration: none;" title="@session.Title">
                         @session.Title
                     </a>
                     <form asp-action="DeleteSession" method="post" class="p-1"
                           onsubmit="return confirm('¿Eliminar esta conversación?');">
                         <input type="hidden" name="sessionId" value="@session.Id" />
-                        <button type="submit" class="btn btn-sm @(session.Id == Model.Session.Id ? "btn-outline-light" : "btn-outline-danger")">&times;</button>
+                        <button type="submit" class="btn btn-sm btn-outline-danger border-0" aria-label="Eliminar conversación">&times;</button>
                     </form>
                 </div>
             }
         </div>
-    </div>
+    </div></div>
 
     <div class="col-md-9">
         <h1 class="h3 mb-1">@Model.Session.Title</h1>
         <p class="text-muted">Pregunta sobre los documentos de la base de conocimiento; el asistente responde citando solo lo que encuentra en ellos.</p>
 
-        <div class="mb-3" style="max-height: 55vh; overflow-y: auto;">
+        <div class="chat-thread mb-3" style="max-height: 55vh; overflow-y: auto;">
             @if (Model.Messages.Count == 0)
             {
                 <div class="alert alert-info">Todavía no has hecho ninguna pregunta en esta conversación.</div>
@@ -45,19 +45,19 @@
                 {
                     var sourcesId = $"sources-{message.Id}";
                     <div class="d-flex mb-3 @(message.IsUser ? "justify-content-end" : "justify-content-start")">
-                        <div class="p-3 rounded @(message.IsUser ? "bg-primary text-white" : "bg-light border")" style="max-width: 75%;">
-                            <div class="small fw-bold mb-1">@(message.IsUser ? "Tú" : "Asistente")</div>
+                        <div class="chat-message @(message.IsUser ? "chat-user" : "chat-ai")">
+                            <div class="chat-role">@(message.IsUser ? "Tú" : "Asistente")</div>
                             <div class="text-break" style="white-space: pre-line;">@message.Content</div>
                             @if (message.Sources.Count > 0)
                             {
-                                <button type="button" class="btn btn-link btn-sm p-0 mt-2" data-bs-toggle="collapse" data-bs-target="#@sourcesId">
+                                <button type="button" class="btn chat-sources-toggle" data-bs-toggle="collapse" data-bs-target="#@sourcesId">
                                     Fuentes (@message.Sources.Count)
                                 </button>
                                 <div class="collapse mt-2" id="@sourcesId">
                                     @foreach (var source in message.Sources)
                                     {
-                                        <div class="small border-start border-2 ps-2 mb-2">
-                                            <div class="fw-bold">[@source.Order] @source.DocumentTitle <span class="text-muted fw-normal">(@source.CategoryName, fragmento @(source.ChunkIndex + 1))</span></div>
+                                        <div class="chat-source">
+                                            <div class="fw-bold"><span class="chat-source-ref">[@source.Order]</span>@source.DocumentTitle <span class="text-muted fw-normal">(@source.CategoryName, fragmento @(source.ChunkIndex + 1))</span></div>
                                             <div class="text-muted text-break" style="white-space: pre-line;">@source.Content</div>
                                         </div>
                                     }
@@ -69,7 +69,7 @@
             }
         </div>
 
-        <form asp-action="Ask" method="post" class="row g-2">
+        <form asp-action="Ask" method="post" class="row g-2 chat-composer">
             <input type="hidden" name="sessionId" value="@Model.Session.Id" />
             <div class="col-md-3">
                 <select name="categoryId" class="form-select">

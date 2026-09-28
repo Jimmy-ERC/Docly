@@ -1,14 +1,14 @@
 @model Docly.Web.ViewComponents.NotificationBellViewModel
 
 <li class="nav-item dropdown">
-    <a class="nav-link text-dark position-relative" href="#" id="notificationBellDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+    <a class="nav-link position-relative" href="#" id="notificationBellDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
         Notificaciones
         @if (Model.UnreadCount > 0)
         {
             <span class="badge rounded-pill bg-danger">@(Model.UnreadCount > 99 ? "99+" : Model.UnreadCount.ToString())</span>
         }
     </a>
-    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="notificationBellDropdown" style="min-width: 320px;">
+    <ul class="dropdown-menu dropdown-menu-end shadow" aria-labelledby="notificationBellDropdown" style="min-width: 320px;">
         @if (Model.Recent.Count == 0)
         {
             <li><span class="dropdown-item-text text-muted">No tienes notificaciones.</span></li>

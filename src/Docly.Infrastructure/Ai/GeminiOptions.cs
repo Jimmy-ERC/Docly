@@ -10,7 +10,8 @@ public class GeminiOptions
     /// <summary>Native Gemini endpoint (not the OpenAI-compatible one).</summary>
     public string BaseUrl { get; set; } = "https://generativelanguage.googleapis.com/";
 
-    /// <summary>The alias always resolves to Google's current stable Flash model, so chat keeps working
-    /// against "the Flash model" (per Docly's project notes) without a code change when Google rotates it.</summary>
-    public string ChatModel { get; set; } = "gemini-flash-latest";
+    /// <summary>Flash-Lite instead of full Flash: as of Google's Dec. 2025 free-tier cut, gemini-3.8-flash
+    /// (behind "gemini-flash-latest") only grants ~20 requests/day, while Flash-Lite grants ~500/day.
+    /// Revisit only after checking both models' current free-tier quota in Google AI Studio.</summary>
+    public string ChatModel { get; set; } = "gemini-flash-lite-latest";
 }
